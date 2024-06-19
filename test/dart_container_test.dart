@@ -1,0 +1,45 @@
+import 'package:dart_container/dart_container.dart';
+import 'package:test/test.dart';
+
+void main() {
+  group('A group of tests', () {
+    setUp(() {
+      // Additional setup goes here.
+    });
+
+    tearDown(() {
+      Container().clear();
+    });
+
+    test('Test not named', () {
+      injectorRegister<String>("Test");
+      expect(injectorGet<String>(), "Test");
+    });
+
+    test('Test not named override', () {
+      injectorRegister<String>("Test");
+      expect(injectorGet<String>(), "Test");
+      injectorRegister<String>("Test2", override: true);
+      expect(injectorGet<String>(), "Test2");
+    });
+
+    test('Test named', () {
+      injectorRegister<String>("Test second", name: "second");
+      expect(injectorGet<String>(name: "second"), "Test second");
+    });
+
+    test('Test named override', () {
+      injectorRegister<String>("Test second", name: "second");
+      expect(injectorGet<String>(name: "second"), "Test second");
+      injectorRegister<String>("Test second 2", name: "second", override: true);
+      expect(injectorGet<String>(name: "second"), "Test second 2");
+    });
+
+    test('Test if present', () {
+      expect(injectorGetIfPresent<String>(), null);
+      injectorRegister<String>("Test");
+      expect(injectorGet<String>(), "Test");
+      expect(injectorGetIfPresent<String>(), "Test");
+    });
+  });
+}
