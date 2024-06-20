@@ -1,8 +1,8 @@
-import 'package:dart_container/dart_container.dart';
+import 'package:dart_container/src/dart_container_base.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('A group of tests', () {
+  group('Injector tests', () {
     setUp(() {
       // Additional setup goes here.
     });
@@ -40,6 +40,20 @@ void main() {
       injectorRegister<String>("Test");
       expect(injectorGet<String>(), "Test");
       expect(injectorGetIfPresent<String>(), "Test");
+    });
+
+    test('Test lazy', () {
+      injectorRegisterLazy<String>(() => "Test");
+      expect(injectorGet<String>(), "Test");
+      expect(injectorGetIfPresent<String>(), "Test");
+    });
+
+    test('Test factory', () {
+      injectorRegisterFactory<String>(
+          () => DateTime.now().microsecondsSinceEpoch.toString());
+      String obj1 = injectorGet<String>();
+      String obj2 = injectorGet<String>();
+      expect(obj1 == obj2, false);
     });
   });
 }

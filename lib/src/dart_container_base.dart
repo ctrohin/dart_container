@@ -1,27 +1,9 @@
-class ContainerKey {
-  final Type type;
-  final String name;
-
-  const ContainerKey(this.type, this.name);
-
-  @override
-  bool operator ==(Object other) {
-    if (other is! ContainerKey) {
-      return false;
-    }
-    return type == other.type && name == other.name;
-  }
-
-  @override
-  int get hashCode => computeHash();
-
-  int computeHash() {
-    return ("$type||||||||$name").hashCode;
-  }
-}
+import 'package:dart_container/src/container_key.dart';
 
 class Container {
   final Map<ContainerKey, Object> _registered = {};
+  final Set _factories = {};
+
   static final Container _singleton = Container._internal();
 
   factory Container() {
@@ -38,13 +20,46 @@ class Container {
     _registered[ContainerKey(T, name)] = object as Object;
   }
 
+  void registerLazy<T>(T Function() builder,
+      {bool override = false, String name = ""}) {
+    if (!override && _registered.containsKey(ContainerKey(T, name))) {
+      throw Exception(
+          "A value is already registered for type $T and name $name");
+    }
+    _registered[ContainerKey(T, name)] = builder;
+  }
+
+  void registerFactory<T>(T Function() factory,
+      {bool override = false, String name = ""}) {
+    if (!override && _registered.containsKey(ContainerKey(T, name))) {
+      throw Exception(
+          "A value is already registered for type $T and name $name");
+    }
+    _factories.add(factory);
+    _registered[ContainerKey(T, name)] = factory;
+  }
+
+  T _findAndBuild<T>({String name = ""}) {
+    Object? existing = _registered[ContainerKey(T, name)];
+    if (existing is Function) {
+      if (_factories.contains(existing)) {
+        return existing() as T;
+      } else {
+        T lazyObject = existing() as T;
+        _registered[ContainerKey(T, name)] = lazyObject as Object;
+        return lazyObject;
+      }
+    }
+    return existing as T;
+  }
+
   T get<T>({String name = ""}) {
-    return _registered[ContainerKey(T, name)] as T;
+    return _findAndBuild<T>(name: name);
   }
 
   T? getIfPresent<T>({String name = ""}) {
     if (_registered.containsKey(ContainerKey(T, name))) {
-      return _registered[ContainerKey(T, name)] as T;
+      return _findAndBuild<T>(name: name);
     }
     return null;
   }
@@ -56,6 +71,16 @@ class Container {
 
 void injectorRegister<T>(T object, {bool override = false, String name = ""}) {
   Container().register<T>(object, override: override, name: name);
+}
+
+void injectorRegisterLazy<T>(T Function() builder,
+    {bool override = false, String name = ""}) {
+  Container().registerLazy<T>(builder, override: override, name: name);
+}
+
+void injectorRegisterFactory<T>(T Function() factory,
+    {bool override = false, String name = ""}) {
+  Container().registerFactory<T>(factory, override: override, name: name);
 }
 
 T injectorGet<T>({String name = ""}) {
