@@ -51,9 +51,18 @@ void main() {
     test('Test factory', () {
       injectorRegisterFactory<String>(
           () => DateTime.now().microsecondsSinceEpoch.toString());
-      String obj1 = injectorGet<String>();
-      String obj2 = injectorGet<String>();
+      String obj1 = injectorGet();
+      String obj2 = injectorGet();
       expect(obj1 == obj2, false);
+    });
+
+    test('Throw exception on get with no object', () {
+      try {
+        String str = injectorGet();
+        assert(false, true);
+      } catch (e) {
+        assert(e is Exception, true);
+      }
     });
   });
 }
