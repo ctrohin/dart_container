@@ -10,6 +10,7 @@ export 'src/dart_container_base.dart'
         injectorGetIfPresent,
         injectorRegisterLazy,
         injectorRegisterFactory,
-        Container;
-
-// TODO: Export any libraries intended for clients of this package.
+        injectorProvideValue,
+        injectorProvideValues,
+        Container,
+        ContainerBuilder;
