@@ -4,7 +4,7 @@ import 'package:dart_container/src/dart_container_base.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('Injector tests', () {
+  group('Simple injection tests', () {
     setUp(() {
       // Additional setup goes here.
     });
@@ -13,82 +13,102 @@ void main() {
       Container().clear();
     });
 
-    test('Test not named', () {
+    test('Test register not named', () {
       injectorRegister<String>("Test");
       expect(injectorGet<String>(), "Test");
     });
 
-    test('Test not named override', () {
+    test('Test register not named override', () {
       injectorRegister<String>("Test");
       expect(injectorGet<String>(), "Test");
       injectorRegister<String>("Test2", override: true);
       expect(injectorGet<String>(), "Test2");
     });
 
-    test('Test named', () {
+    test('Test register named', () {
       injectorRegister<String>("Test second", name: "second");
       expect(injectorGet<String>(name: "second"), "Test second");
     });
 
-    test('Test named override', () {
+    test('Test register named override', () {
       injectorRegister<String>("Test second", name: "second");
       expect(injectorGet<String>(name: "second"), "Test second");
       injectorRegister<String>("Test second 2", name: "second", override: true);
       expect(injectorGet<String>(name: "second"), "Test second 2");
     });
 
-    test('Test if present', () {
+    test('Test register if present', () {
       expect(injectorGetIfPresent<String>(), null);
       injectorRegister<String>("Test");
       expect(injectorGet<String>(), "Test");
       expect(injectorGetIfPresent<String>(), "Test");
     });
 
-    test('Test lazy', () {
+    test('Throw exception on register get with no object registered', () {
+      try {
+        injectorGet<String>();
+        assert(false, true);
+      } catch (e) {
+        assert(e is Exception, true);
+      }
+    });
+  });
+
+  group('Lazy injection tests', () {
+    tearDown(() {
+      Container().clear();
+    });
+
+    test('Test register lazy', () {
       injectorRegisterLazy<String>(() => "Test");
       expect(injectorGet<String>(), "Test");
       expect(injectorGetIfPresent<String>(), "Test");
     });
 
-    test('Test factory', () {
+    test('Test register factory', () {
       injectorRegisterFactory<String>(
           () => DateTime.now().microsecondsSinceEpoch.toString());
       String obj1 = injectorGet();
       String obj2 = injectorGet();
       expect(obj1 == obj2, false);
     });
+  });
 
-    test('Throw exception on get with no object', () {
-      try {
-        String str = injectorGet();
-        assert(false, true);
-      } catch (e) {
-        assert(e is Exception, true);
-      }
+  group("Value injection tests", () {
+    tearDown(() {
+      Container().clear();
     });
 
-    test('Inject value', () {
+    test('Test provide value', () {
       injectorProvideValue("test", "Test");
       expect(injectorGetValue("test"), "Test");
     });
 
-    test('Inject value', () {
+    test('Test provide value if present', () {
       injectorProvideValue("test", "Test");
-      print(injectorGetValueIfPresent("test"));
       expect(injectorGetValueIfPresent<String>("test"), "Test");
     });
 
     test('Throw exception on get value with no value set', () {
       try {
         injectorGetValue<String>("test");
-        assert(false, true);
+        expect(false, true);
       } catch (e) {
-        print(e);
-        assert(e is Exception, true);
+        expect(e is Exception, true);
       }
     });
 
-    test('Find for profile', () {
+    test('Test inject null on value injection with no value set', () {
+      expect(injectorGetValueIfPresent<String>("test"), null);
+    });
+  });
+
+  group("Profile tests", () {
+    tearDown(() {
+      Container().clear();
+    });
+
+    test('Test register with profile inject for profile', () {
       ContainerBuilder().register(
         "Test",
         profiles: ["Test"],
@@ -99,6 +119,36 @@ void main() {
       ).setProfile("Test");
       expect(injectorGet<String>(), "Test");
       expect(injectorGetIfPresent<String>(name: "testName"), null);
+    });
+
+    test(
+        'Test register with profile inject for profile throws exception when different profile',
+        () {
+      ContainerBuilder().register(
+        "Test",
+        profiles: ["Test"],
+      ).setProfile("Test1");
+      try {
+        injectorGet<String>();
+        expect(true, false);
+      } catch (e) {
+        expect(e is Exception, true);
+      }
+    });
+
+    test('Set the profile', () {
+      injectorSetProfile("test");
+      expect(injectorGetProfile(), "test");
+    });
+
+    test('Throw exception when trying to set the profile twice', () {
+      try {
+        injectorSetProfile("test");
+        injectorSetProfile("test1");
+        expect(false, true);
+      } catch (e) {
+        expect(e is Exception, true);
+      }
     });
   });
 }

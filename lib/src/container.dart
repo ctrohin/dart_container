@@ -23,7 +23,7 @@ class Container {
       _profile = newProfile;
     } else {
       throw Exception(
-          "A profile other than `$defaultProfile` is already active!");
+          "Profile $_profile is already active! Another profile cannot be selected while running!");
     }
   }
 
