@@ -85,5 +85,18 @@ void main() {
         assert(e is Exception, true);
       }
     });
+
+    test('Find for profile', () {
+      ContainerBuilder().register(
+        "Test",
+        profiles: ["Test"],
+      ).register(
+        "Test",
+        name: "testName",
+        profiles: ["Test1"],
+      ).setProfile("Test");
+      expect(injectorGet<String>(), "Test");
+      expect(injectorGetIfPresent<String>(name: "testName"), null);
+    });
   });
 }

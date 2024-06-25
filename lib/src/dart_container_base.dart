@@ -1,10 +1,14 @@
 import 'package:dart_container/src/container_key.dart';
 import 'package:dart_container/src/container_object.dart';
 import 'package:dart_container/src/object_type.dart';
+import 'package:dart_container/src/value_key.dart';
 
 class Container {
   final Map<ContainerKey, ContainerObject> _registered = {};
-  final Map<String, dynamic> _values = {};
+  final Map<ValueKey, dynamic> _values = {};
+  static const String defaultProfile = "default";
+  static const List<String> defaultProfiles = <String>[defaultProfile];
+  String _profile = defaultProfile;
 
   static final Container _singleton = Container._internal();
 
@@ -14,48 +18,83 @@ class Container {
 
   Container._internal();
 
-  void register<T>(T object, {bool override = false, String name = ""}) {
-    if (!override && _registered.containsKey(ContainerKey(T, name))) {
+  void setProfile(String newProfile) {
+    if (_profile == defaultProfile) {
+      _profile = newProfile;
+    } else {
       throw Exception(
-          "A value is already registered for type $T and name $name");
+          "A profile other than `$defaultProfile` is already active!");
     }
-    _registered[ContainerKey(T, name)] =
-        ContainerObject(object as Object, ObjectType.simple);
   }
 
-  void registerLazy<T>(T Function() builder,
-      {bool override = false, String name = ""}) {
-    if (!override && _registered.containsKey(ContainerKey(T, name))) {
-      throw Exception(
-          "A value is already registered for type $T and name $name");
-    }
-    _registered[ContainerKey(T, name)] =
-        ContainerObject(builder, ObjectType.builder);
+  String getProfile() {
+    return _profile;
   }
 
-  void registerFactory<T>(T Function() factory,
-      {bool override = false, String name = ""}) {
+  void register<T>(
+    T object, {
+    bool override = false,
+    String name = "",
+    List<String> profiles = Container.defaultProfiles,
+  }) {
     if (!override && _registered.containsKey(ContainerKey(T, name))) {
       throw Exception(
           "A value is already registered for type $T and name $name");
     }
     _registered[ContainerKey(T, name)] =
-        ContainerObject(factory, ObjectType.factory);
+        ContainerObject(object as Object, ObjectType.simple, profiles);
+  }
+
+  void registerLazy<T>(
+    T Function() builder, {
+    bool override = false,
+    String name = "",
+    List<String> profiles = defaultProfiles,
+  }) {
+    if (!override && _registered.containsKey(ContainerKey(T, name))) {
+      throw Exception(
+          "A value is already registered for type $T and name $name");
+    }
+    _registered[ContainerKey(T, name)] =
+        ContainerObject(builder, ObjectType.builder, profiles);
+  }
+
+  void registerFactory<T>(
+    T Function() factory, {
+    bool override = false,
+    String name = "",
+    List<String> profiles = defaultProfiles,
+  }) {
+    if (!override && _registered.containsKey(ContainerKey(T, name))) {
+      throw Exception(
+          "A value is already registered for type $T and name $name");
+    }
+    _registered[ContainerKey(T, name)] =
+        ContainerObject(factory, ObjectType.factory, profiles);
   }
 
   T _findAndBuild<T>({String name = ""}) {
     ContainerObject? existing = _registered[ContainerKey(T, name)];
-    if (existing?.objectType != ObjectType.simple) {
-      if (existing?.objectType == ObjectType.factory) {
-        return (existing?.object as Function)() as T;
-      } else {
-        T lazyObject = (existing?.object as Function)() as T;
-        _registered[ContainerKey(T, name)] =
-            ContainerObject(lazyObject as Object, ObjectType.simple);
-        return lazyObject;
-      }
+    if (existing == null || !existing.profiles.contains(_profile)) {
+      throw Exception(
+          "No object present in the container of type $T, name $name and profile $_profile");
     }
-    return existing?.object as T;
+
+    if (existing.objectType == ObjectType.simple) {
+      return existing.object as T;
+    }
+
+    if (existing.objectType == ObjectType.factory) {
+      return (existing.object as Function)() as T;
+    }
+
+    T lazyObject = (existing.object as Function)() as T;
+    _registered[ContainerKey(T, name)] = ContainerObject(
+      lazyObject as Object,
+      ObjectType.simple,
+      existing.profiles,
+    );
+    return lazyObject;
   }
 
   T get<T>({String name = ""}) {
@@ -68,53 +107,166 @@ class Container {
 
   T? getIfPresent<T>({String name = ""}) {
     if (_registered.containsKey(ContainerKey(T, name))) {
-      return _findAndBuild<T>(name: name);
+      try {
+        return _findAndBuild<T>(name: name);
+      } catch (e) {
+        return null;
+      }
     }
     return null;
   }
 
-  void registerValues(Map<String, dynamic> values) {
+  void registerValues(Map<String, dynamic> values,
+      {List<String> profiles = defaultProfiles}) {
     values.forEach((key, value) {
-      _values[key] = value;
+      for (var profile in profiles) {
+        _values[ValueKey(key, profile)] = value;
+      }
     });
   }
 
-  void registerValue(String key, dynamic value) {
-    _values[key] = value;
+  void registerValue(String key, dynamic value,
+      {List<String> profiles = defaultProfiles}) {
+    for (var profile in profiles) {
+      _values[ValueKey(key, profile)] = value;
+    }
   }
 
   T? getValueIfPresent<T>(String key) {
-    if (_values.containsKey(key)) {
-      return _values[key] as T;
+    ValueKey vKey = ValueKey(key, _profile);
+    if (_values.containsKey(vKey)) {
+      return _values[vKey] as T;
     }
     return null;
   }
 
   T getValue<T>(String key) {
-    if (!_values.containsKey(key)) {
-      throw Exception("No value was provided for key $key");
+    ValueKey vKey = ValueKey(key, _profile);
+    if (!_values.containsKey(vKey)) {
+      throw Exception(
+          "No value was provided for key $key and profile $_profile");
     }
-    return _values[key] as T;
+    return _values[vKey] as T;
   }
 
   void clear() {
     _registered.clear();
     _values.clear();
+    _profile = defaultProfile;
   }
 }
 
-void injectorRegister<T>(T object, {bool override = false, String name = ""}) {
-  Container().register<T>(object, override: override, name: name);
+class ContainerBuilder {
+  const ContainerBuilder();
+
+  ContainerBuilder register<T>(
+    T object, {
+    bool override = false,
+    String name = "",
+    List<String> profiles = Container.defaultProfiles,
+  }) {
+    Container().register<T>(
+      object,
+      override: override,
+      name: name,
+      profiles: profiles,
+    );
+    return this;
+  }
+
+  ContainerBuilder registerLazy<T>(
+    T Function() builder, {
+    bool override = false,
+    String name = "",
+    List<String> profiles = Container.defaultProfiles,
+  }) {
+    Container().registerLazy<T>(
+      builder,
+      override: override,
+      name: name,
+      profiles: profiles,
+    );
+    return this;
+  }
+
+  ContainerBuilder registerFactory<T>(
+    T Function() factory, {
+    bool override = false,
+    String name = "",
+    List<String> profiles = Container.defaultProfiles,
+  }) {
+    Container().registerFactory<T>(
+      factory,
+      override: override,
+      name: name,
+      profiles: profiles,
+    );
+    return this;
+  }
+
+  ContainerBuilder provideValue(
+    String key,
+    dynamic value, {
+    List<String> profiles = Container.defaultProfiles,
+  }) {
+    Container().registerValue(key, value, profiles: profiles);
+    return this;
+  }
+
+  ContainerBuilder provideValues(
+    Map<String, dynamic> values, {
+    List<String> profiles = Container.defaultProfiles,
+  }) {
+    Container().registerValues(values, profiles: profiles);
+    return this;
+  }
+
+  ContainerBuilder setProfile(String profile) {
+    Container().setProfile(profile);
+    return this;
+  }
 }
 
-void injectorRegisterLazy<T>(T Function() builder,
-    {bool override = false, String name = ""}) {
-  Container().registerLazy<T>(builder, override: override, name: name);
+void injectorRegister<T>(
+  T object, {
+  bool override = false,
+  String name = "",
+  List<String> profiles = Container.defaultProfiles,
+}) {
+  Container().register<T>(
+    object,
+    override: override,
+    name: name,
+    profiles: profiles,
+  );
 }
 
-void injectorRegisterFactory<T>(T Function() factory,
-    {bool override = false, String name = ""}) {
-  Container().registerFactory<T>(factory, override: override, name: name);
+void injectorRegisterLazy<T>(
+  T Function() builder, {
+  bool override = false,
+  String name = "",
+  List<String> profiles = Container.defaultProfiles,
+}) {
+  Container().registerLazy<T>(
+    builder,
+    override: override,
+    name: name,
+    profiles: profiles,
+  );
+}
+
+void injectorRegisterFactory<T>(
+  T Function() factory, {
+  bool override = false,
+  String name = "",
+  List<String> profiles = Container.defaultProfiles,
+}) {
+  Container().registerFactory<T>(
+    factory,
+    override: override,
+    name: name,
+    profiles: profiles,
+  );
 }
 
 T injectorGet<T>({String name = ""}) {
@@ -125,12 +277,19 @@ T? injectorGetIfPresent<T>({String name = ""}) {
   return Container().getIfPresent<T>(name: name);
 }
 
-void injectorProvideValue(String key, dynamic value) {
-  Container().registerValue(key, value);
+void injectorProvideValue(
+  String key,
+  dynamic value, {
+  List<String> profiles = Container.defaultProfiles,
+}) {
+  Container().registerValue(key, value, profiles: profiles);
 }
 
-void injectorProvideValues(Map<String, dynamic> values) {
-  Container().registerValues(values);
+void injectorProvideValues(
+  Map<String, dynamic> values, {
+  List<String> profiles = Container.defaultProfiles,
+}) {
+  Container().registerValues(values, profiles: profiles);
 }
 
 T injectorGetValue<T>(String key) {
@@ -139,4 +298,12 @@ T injectorGetValue<T>(String key) {
 
 T? injectorGetValueIfPresent<T>(String key) {
   return Container().getValueIfPresent<T>(key);
+}
+
+void injectorSetProfile(String profile) {
+  Container().setProfile(profile);
+}
+
+String injectorGetProfile() {
+  return Container().getProfile();
 }
