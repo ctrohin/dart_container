@@ -12,5 +12,9 @@ export 'src/dart_container_base.dart'
         injectorRegisterFactory,
         injectorProvideValue,
         injectorProvideValues,
+        injectorGetValue,
+        injectorGetValueIfPresent,
+        injectorSetProfile,
+        injectorGetProfile,
         Container,
         ContainerBuilder;
