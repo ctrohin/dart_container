@@ -64,5 +64,26 @@ void main() {
         assert(e is Exception, true);
       }
     });
+
+    test('Inject value', () {
+      injectorProvideValue("test", "Test");
+      expect(injectorGetValue("test"), "Test");
+    });
+
+    test('Inject value', () {
+      injectorProvideValue("test", "Test");
+      print(injectorGetValueIfPresent("test"));
+      expect(injectorGetValueIfPresent<String>("test"), "Test");
+    });
+
+    test('Throw exception on get value with no value set', () {
+      try {
+        injectorGetValue<String>("test");
+        assert(false, true);
+      } catch (e) {
+        print(e);
+        assert(e is Exception, true);
+      }
+    });
   });
 }

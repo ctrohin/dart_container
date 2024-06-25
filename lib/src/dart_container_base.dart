@@ -4,6 +4,7 @@ import 'package:dart_container/src/object_type.dart';
 
 class Container {
   final Map<ContainerKey, ContainerObject> _registered = {};
+  final Map<String, dynamic> _values = {};
 
   static final Container _singleton = Container._internal();
 
@@ -72,8 +73,33 @@ class Container {
     return null;
   }
 
+  void registerValues(Map<String, dynamic> values) {
+    values.forEach((key, value) {
+      _values[key] = value;
+    });
+  }
+
+  void registerValue(String key, dynamic value) {
+    _values[key] = value;
+  }
+
+  T? getValueIfPresent<T>(String key) {
+    if (_values.containsKey(key)) {
+      return _values[key] as T;
+    }
+    return null;
+  }
+
+  T getValue<T>(String key) {
+    if (!_values.containsKey(key)) {
+      throw Exception("No value was provided for key $key");
+    }
+    return _values[key] as T;
+  }
+
   void clear() {
     _registered.clear();
+    _values.clear();
   }
 }
 
@@ -97,4 +123,20 @@ T injectorGet<T>({String name = ""}) {
 
 T? injectorGetIfPresent<T>({String name = ""}) {
   return Container().getIfPresent<T>(name: name);
+}
+
+void injectorProvideValue(String key, dynamic value) {
+  Container().registerValue(key, value);
+}
+
+void injectorProvideValues(Map<String, dynamic> values) {
+  Container().registerValues(values);
+}
+
+T injectorGetValue<T>(String key) {
+  return Container().getValue<T>(key);
+}
+
+T? injectorGetValueIfPresent<T>(String key) {
+  return Container().getValueIfPresent<T>(key);
 }
