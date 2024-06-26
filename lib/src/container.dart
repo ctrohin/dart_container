@@ -100,6 +100,7 @@ class Container {
 
   T get<T>({String name = ""}) {
     if (!_registered.containsKey(ContainerKey(T, name))) {
+      print(_registered);
       throw Exception(
           "No object of type $T and name $name found in the container");
     }
