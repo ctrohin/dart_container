@@ -18,4 +18,9 @@ class ContainerKey {
   int computeHash() {
     return ("$type||||||||$name").hashCode;
   }
+
+  @override
+  String toString() {
+    return "type=$type name=$name";
+  }
 }

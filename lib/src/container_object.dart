@@ -6,4 +6,9 @@ class ContainerObject {
   final List<String> profiles;
 
   ContainerObject(this.object, this.objectType, this.profiles);
+
+  @override
+  String toString() {
+    return "type=$objectType object=$object profiles=$profiles";
+  }
 }
