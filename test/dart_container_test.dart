@@ -14,32 +14,33 @@ void main() {
     });
 
     test('Test register not named', () {
-      injectorRegister<String>("Test");
+      injectorRegister<String>(object: "Test");
       expect(injectorGet<String>(), "Test");
     });
 
     test('Test register not named override', () {
-      injectorRegister<String>("Test");
+      injectorRegister<String>(object: "Test");
       expect(injectorGet<String>(), "Test");
-      injectorRegister<String>("Test2", override: true);
+      injectorRegister<String>(object: "Test2", override: true);
       expect(injectorGet<String>(), "Test2");
     });
 
     test('Test register named', () {
-      injectorRegister<String>("Test second", name: "second");
+      injectorRegister<String>(object: "Test second", name: "second");
       expect(injectorGet<String>(name: "second"), "Test second");
     });
 
     test('Test register named override', () {
-      injectorRegister<String>("Test second", name: "second");
+      injectorRegister<String>(object: "Test second", name: "second");
       expect(injectorGet<String>(name: "second"), "Test second");
-      injectorRegister<String>("Test second 2", name: "second", override: true);
+      injectorRegister<String>(
+          object: "Test second 2", name: "second", override: true);
       expect(injectorGet<String>(name: "second"), "Test second 2");
     });
 
     test('Test register if present', () {
       expect(injectorGetIfPresent<String>(), null);
-      injectorRegister<String>("Test");
+      injectorRegister<String>(object: "Test");
       expect(injectorGet<String>(), "Test");
       expect(injectorGetIfPresent<String>(), "Test");
     });
@@ -60,14 +61,14 @@ void main() {
     });
 
     test('Test register lazy', () {
-      injectorRegisterLazy<String>(() => "Test");
+      injectorRegister<String>(builder: () => "Test");
       expect(injectorGet<String>(), "Test");
       expect(injectorGetIfPresent<String>(), "Test");
     });
 
     test('Test register factory', () {
-      injectorRegisterFactory<String>(
-          () => DateTime.now().microsecondsSinceEpoch.toString());
+      injectorRegister<String>(
+          factory: () => DateTime.now().microsecondsSinceEpoch.toString());
       String obj1 = injectorGet();
       String obj2 = injectorGet();
       expect(obj1 == obj2, false);
@@ -110,10 +111,10 @@ void main() {
 
     test('Test register with profile inject for profile', () {
       ContainerBuilder().register(
-        "Test",
+        object: "Test",
         profiles: ["Test"],
       ).register(
-        "Test",
+        object: "Test",
         name: "testName",
         profiles: ["Test1"],
       ).setProfile("Test");
@@ -125,7 +126,7 @@ void main() {
         'Test register with profile inject for profile throws exception when different profile',
         () {
       ContainerBuilder().register(
-        "Test",
+        object: "Test",
         profiles: ["Test"],
       ).setProfile("Test1");
       try {

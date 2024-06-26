@@ -1,42 +1,18 @@
 import 'package:dart_container/src/container.dart';
 
 // Helper functions
-void injectorRegister<T>(
-  T object, {
+void injectorRegister<T>({
+  T? object,
+  T Function()? builder,
+  T Function()? factory,
   bool override = false,
   String name = "",
   List<String> profiles = Container.defaultProfiles,
 }) {
   Container().register<T>(
-    object,
-    override: override,
-    name: name,
-    profiles: profiles,
-  );
-}
-
-void injectorRegisterLazy<T>(
-  T Function() builder, {
-  bool override = false,
-  String name = "",
-  List<String> profiles = Container.defaultProfiles,
-}) {
-  Container().registerLazy<T>(
-    builder,
-    override: override,
-    name: name,
-    profiles: profiles,
-  );
-}
-
-void injectorRegisterFactory<T>(
-  T Function() factory, {
-  bool override = false,
-  String name = "",
-  List<String> profiles = Container.defaultProfiles,
-}) {
-  Container().registerFactory<T>(
-    factory,
+    object: object,
+    builder: builder,
+    factory: factory,
     override: override,
     name: name,
     profiles: profiles,
@@ -44,47 +20,19 @@ void injectorRegisterFactory<T>(
 }
 
 void injectorRegisterTyped(
-  Type t,
-  dynamic object, {
+  Type t, {
+  dynamic object,
+  dynamic Function()? builder,
+  dynamic Function()? factory,
   bool override = false,
   String name = "",
   List<String> profiles = Container.defaultProfiles,
 }) {
   Container().registerTyped(
     t,
-    object,
-    override: override,
-    name: name,
-    profiles: profiles,
-  );
-}
-
-void injectorRegisterTypedLazy(
-  Type t,
-  dynamic Function() builder, {
-  bool override = false,
-  String name = "",
-  List<String> profiles = Container.defaultProfiles,
-}) {
-  Container().registerTypedLazy(
-    t,
-    builder,
-    override: override,
-    name: name,
-    profiles: profiles,
-  );
-}
-
-void injectorRegisterTypedFactory(
-  Type t,
-  dynamic Function() factory, {
-  bool override = false,
-  String name = "",
-  List<String> profiles = Container.defaultProfiles,
-}) {
-  Container().registerTypedFactory(
-    t,
-    factory,
+    object: object,
+    builder: builder,
+    factory: factory,
     override: override,
     name: name,
     profiles: profiles,

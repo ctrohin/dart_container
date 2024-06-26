@@ -31,9 +31,9 @@ class Container {
     return _profile;
   }
 
-  void registerTyped(
-    Type t,
-    dynamic object, {
+  void _registerTyped(
+    Type t, {
+    dynamic object,
     bool override = false,
     String name = "",
     List<String> profiles = Container.defaultProfiles,
@@ -46,17 +46,71 @@ class Container {
         ContainerObject(object as Object, ObjectType.simple, profiles);
   }
 
-  void register<T>(
-    T object, {
+  void register<T>({
+    T? object,
+    T Function()? builder,
+    T Function()? factory,
     bool override = false,
     String name = "",
     List<String> profiles = Container.defaultProfiles,
   }) {
-    registerTyped(T, object,
-        override: override, name: name, profiles: profiles);
+    registerTyped(T,
+        object: object,
+        builder: builder,
+        factory: factory,
+        override: override,
+        name: name,
+        profiles: profiles);
   }
 
-  void registerTypedLazy(
+  void registerTyped(
+    Type t, {
+    dynamic object,
+    dynamic Function()? builder,
+    dynamic Function()? factory,
+    bool override = false,
+    String name = "",
+    List<String> profiles = Container.defaultProfiles,
+  }) {
+    int count = 0;
+    ObjectType objType = ObjectType.simple;
+    if (object != null) {
+      objType = ObjectType.simple;
+      count++;
+    }
+    if (builder != null) {
+      count++;
+      objType = ObjectType.builder;
+    }
+    if (factory != null) {
+      count++;
+      objType = ObjectType.factory;
+    }
+    if (count == 0) {
+      throw Exception(
+          "You must specify one of the 'object', 'builder' or 'factory' parameters");
+    }
+    if (count > 1) {
+      throw Exception(
+          "You can only specify one of the 'object', 'builder' or 'factory' parameters");
+    }
+    switch (objType) {
+      case ObjectType.simple:
+        _registerTyped(t,
+            object: object, override: override, name: name, profiles: profiles);
+        return;
+      case ObjectType.factory:
+        _registerTypedFactory(t, factory!,
+            override: override, name: name, profiles: profiles);
+        return;
+      case ObjectType.builder:
+        _registerTypedLazy(t, builder!,
+            override: override, name: name, profiles: profiles);
+        return;
+    }
+  }
+
+  void _registerTypedLazy(
     Type t,
     dynamic Function() builder, {
     bool override = false,
@@ -71,17 +125,7 @@ class Container {
         ContainerObject(builder, ObjectType.builder, profiles);
   }
 
-  void registerLazy<T>(
-    T Function() builder, {
-    bool override = false,
-    String name = "",
-    List<String> profiles = defaultProfiles,
-  }) {
-    registerTypedLazy(T, builder,
-        override: override, name: name, profiles: profiles);
-  }
-
-  void registerTypedFactory(
+  void _registerTypedFactory(
     Type t,
     dynamic Function() factory, {
     bool override = false,
@@ -94,16 +138,6 @@ class Container {
     }
     _registered[ContainerKey(t, name)] =
         ContainerObject(factory, ObjectType.factory, profiles);
-  }
-
-  void registerFactory<T>(
-    T Function() factory, {
-    bool override = false,
-    String name = "",
-    List<String> profiles = defaultProfiles,
-  }) {
-    registerTypedFactory(T, factory,
-        override: override, name: name, profiles: profiles);
   }
 
   T _findAndBuild<T>({String name = ""}) {

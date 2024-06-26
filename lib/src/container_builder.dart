@@ -3,14 +3,18 @@ import 'package:dart_container/src/container.dart';
 class ContainerBuilder {
   const ContainerBuilder();
 
-  ContainerBuilder register<T>(
-    T object, {
+  ContainerBuilder register<T>({
+    T? object,
+    T Function()? builder,
+    T Function()? factory,
     bool override = false,
     String name = "",
     List<String> profiles = Container.defaultProfiles,
   }) {
     Container().register<T>(
-      object,
+      object: object,
+      builder: builder,
+      factory: factory,
       override: override,
       name: name,
       profiles: profiles,
@@ -18,29 +22,20 @@ class ContainerBuilder {
     return this;
   }
 
-  ContainerBuilder registerLazy<T>(
-    T Function() builder, {
+  ContainerBuilder registerTyped(
+    Type t, {
+    dynamic object,
+    dynamic Function()? builder,
+    dynamic Function()? factory,
     bool override = false,
     String name = "",
     List<String> profiles = Container.defaultProfiles,
   }) {
-    Container().registerLazy<T>(
-      builder,
-      override: override,
-      name: name,
-      profiles: profiles,
-    );
-    return this;
-  }
-
-  ContainerBuilder registerFactory<T>(
-    T Function() factory, {
-    bool override = false,
-    String name = "",
-    List<String> profiles = Container.defaultProfiles,
-  }) {
-    Container().registerFactory<T>(
-      factory,
+    Container().registerTyped(
+      t,
+      object: object,
+      builder: builder,
+      factory: factory,
       override: override,
       name: name,
       profiles: profiles,
