@@ -31,7 +31,7 @@ var myObject = MyClass();
 var myProperty = "Prop value";
 // Register with the container
 ContainerBuilder()
-    .register(myObject)
+    .register(object: myObject)
     .provideValue("myProperty", myProperty);
 
 // Retrieve object
@@ -63,8 +63,8 @@ class SimpleObj {
 // Register with the container
 ContainerBuilder()
     //Inject the builder function that will only be called once to create the container object
-    .registerLazy(() => MyClass())
-    .registerFactory(() => SimpleObj(DateTime.now().microsecondsSinceEpoch.toString()));
+    .register(builder: () => MyClass())
+    .register(factory: () => SimpleObj(DateTime.now().microsecondsSinceEpoch.toString()));
 
 // Retrieve object
 MyClass injectedObject = Container().get();
@@ -83,7 +83,7 @@ var myProperty = "Prop value";
 
 // Register with the container
 ContainerBuilder()
-    .register(myObject, profiles: ["test", "run"])
+    .register(object: myObject, profiles: ["test", "run"])
     .provideValue("myProperty", myProperty, profiles: ["test", "run"])
     // Setting the active profile
     .setProfile("run");
