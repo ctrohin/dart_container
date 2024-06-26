@@ -31,18 +31,44 @@ class Container {
     return _profile;
   }
 
+  void registerTyped(
+    Type t,
+    dynamic object, {
+    bool override = false,
+    String name = "",
+    List<String> profiles = Container.defaultProfiles,
+  }) {
+    if (!override && _registered.containsKey(ContainerKey(t, name))) {
+      throw Exception(
+          "A value is already registered for type $t and name $name");
+    }
+    _registered[ContainerKey(t, name)] =
+        ContainerObject(object as Object, ObjectType.simple, profiles);
+  }
+
   void register<T>(
     T object, {
     bool override = false,
     String name = "",
     List<String> profiles = Container.defaultProfiles,
   }) {
-    if (!override && _registered.containsKey(ContainerKey(T, name))) {
+    registerTyped(T, object,
+        override: override, name: name, profiles: profiles);
+  }
+
+  void registerTypedLazy(
+    Type t,
+    dynamic Function() builder, {
+    bool override = false,
+    String name = "",
+    List<String> profiles = defaultProfiles,
+  }) {
+    if (!override && _registered.containsKey(ContainerKey(t, name))) {
       throw Exception(
-          "A value is already registered for type $T and name $name");
+          "A value is already registered for type $t and name $name");
     }
-    _registered[ContainerKey(T, name)] =
-        ContainerObject(object as Object, ObjectType.simple, profiles);
+    _registered[ContainerKey(t, name)] =
+        ContainerObject(builder, ObjectType.builder, profiles);
   }
 
   void registerLazy<T>(
@@ -51,12 +77,23 @@ class Container {
     String name = "",
     List<String> profiles = defaultProfiles,
   }) {
-    if (!override && _registered.containsKey(ContainerKey(T, name))) {
+    registerTypedLazy(T, builder,
+        override: override, name: name, profiles: profiles);
+  }
+
+  void registerTypedFactory(
+    Type t,
+    dynamic Function() factory, {
+    bool override = false,
+    String name = "",
+    List<String> profiles = defaultProfiles,
+  }) {
+    if (!override && _registered.containsKey(ContainerKey(t, name))) {
       throw Exception(
-          "A value is already registered for type $T and name $name");
+          "A value is already registered for type $t and name $name");
     }
-    _registered[ContainerKey(T, name)] =
-        ContainerObject(builder, ObjectType.builder, profiles);
+    _registered[ContainerKey(t, name)] =
+        ContainerObject(factory, ObjectType.factory, profiles);
   }
 
   void registerFactory<T>(
@@ -65,12 +102,8 @@ class Container {
     String name = "",
     List<String> profiles = defaultProfiles,
   }) {
-    if (!override && _registered.containsKey(ContainerKey(T, name))) {
-      throw Exception(
-          "A value is already registered for type $T and name $name");
-    }
-    _registered[ContainerKey(T, name)] =
-        ContainerObject(factory, ObjectType.factory, profiles);
+    registerTypedFactory(T, factory,
+        override: override, name: name, profiles: profiles);
   }
 
   T _findAndBuild<T>({String name = ""}) {

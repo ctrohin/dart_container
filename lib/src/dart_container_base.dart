@@ -43,6 +43,54 @@ void injectorRegisterFactory<T>(
   );
 }
 
+void injectorRegisterTyped(
+  Type t,
+  dynamic object, {
+  bool override = false,
+  String name = "",
+  List<String> profiles = Container.defaultProfiles,
+}) {
+  Container().registerTyped(
+    t,
+    object,
+    override: override,
+    name: name,
+    profiles: profiles,
+  );
+}
+
+void injectorRegisterTypedLazy(
+  Type t,
+  dynamic Function() builder, {
+  bool override = false,
+  String name = "",
+  List<String> profiles = Container.defaultProfiles,
+}) {
+  Container().registerTypedLazy(
+    t,
+    builder,
+    override: override,
+    name: name,
+    profiles: profiles,
+  );
+}
+
+void injectorRegisterTypedFactory(
+  Type t,
+  dynamic Function() factory, {
+  bool override = false,
+  String name = "",
+  List<String> profiles = Container.defaultProfiles,
+}) {
+  Container().registerTypedFactory(
+    t,
+    factory,
+    override: override,
+    name: name,
+    profiles: profiles,
+  );
+}
+
 T injectorGet<T>({String name = ""}) {
   return Container().get<T>(name: name);
 }
