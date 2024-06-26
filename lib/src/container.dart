@@ -76,6 +76,7 @@ class Container {
   T _findAndBuild<T>({String name = ""}) {
     ContainerObject? existing = _registered[ContainerKey(T, name)];
     if (existing == null || !existing.profiles.contains(_profile)) {
+      print(_registered);
       throw Exception(
           "No object present in the container of type $T, name $name and profile $_profile");
     }
