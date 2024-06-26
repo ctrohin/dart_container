@@ -100,3 +100,31 @@ String property = Container().getValue("myProperty");
 // If the value does not exist on the active profile, this method will return null
 String? propertyIfPresent = Container().getValueIfPresent("myProperty");
 ```
+
+### Injecting objects for interfaces
+```dart
+
+class MyInterface {
+    void doSomething() {}
+}
+
+class MyClass implements MyInterface {
+    @override
+    void doSomething() {
+        print("Something");
+    }
+}
+
+var myObject = MyClass();
+var myProperty = "Prop value";
+
+// Register with the container for the interface instead of the type
+ContainerBuilder()
+    .registerTyped(MyInterface, object: myObject);
+
+// If the object is not present in the container for the active profile, this method will throw an exception
+MyClass injectedObject = Container().get();
+// Retrieve object if present. 
+// If the object is not present in the container for the active profile, this method will return null
+MyClass? injectedObjectIfPresent = Container().getIfPresent();
+```
