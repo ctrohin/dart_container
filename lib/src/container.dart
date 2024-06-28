@@ -30,6 +30,10 @@ class Container {
   }
 
   void setConfiguration(ContainerConfiguration configuration) {
+    if (_registered.isNotEmpty) {
+      throw Exception(
+          "Cannot set the configuration after object have already been injected");
+    }
     _contaienrConfiguration = configuration;
   }
 

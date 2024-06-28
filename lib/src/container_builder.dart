@@ -1,3 +1,4 @@
+import 'package:dart_container/dart_container.dart';
 import 'package:dart_container/src/container.dart';
 
 class ContainerBuilder {
@@ -62,6 +63,11 @@ class ContainerBuilder {
 
   ContainerBuilder setProfile(String profile) {
     Container().setProfile(profile);
+    return this;
+  }
+
+  ContainerBuilder setConfiguration(ContainerConfiguration configuration) {
+    Container().setConfiguration(configuration);
     return this;
   }
 }

@@ -1,3 +1,4 @@
+import 'package:dart_container/dart_container.dart';
 import 'package:dart_container/src/container.dart';
 
 // Helper functions
@@ -76,4 +77,8 @@ void injectorSetProfile(String profile) {
 
 String injectorGetProfile() {
   return Container().getProfile();
+}
+
+void setConfiguration(ContainerConfiguration config) {
+  Container().setConfiguration(config);
 }
