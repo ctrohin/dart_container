@@ -1,3 +1,4 @@
+import 'package:dart_container/src/container_configuration.dart';
 import 'package:dart_container/src/container_key.dart';
 import 'package:dart_container/src/container_object.dart';
 import 'package:dart_container/src/object_type.dart';
@@ -9,6 +10,7 @@ class Container {
   static const String defaultProfile = "default";
   static const List<String> defaultProfiles = <String>[defaultProfile];
   String _profile = defaultProfile;
+  ContainerConfiguration? _contaienrConfiguration;
 
   static final Container _singleton = Container._internal();
 
@@ -27,6 +29,10 @@ class Container {
     }
   }
 
+  void setConfiguration(ContainerConfiguration configuration) {
+    _contaienrConfiguration = configuration;
+  }
+
   String getProfile() {
     return _profile;
   }
@@ -38,12 +44,15 @@ class Container {
     String name = "",
     List<String> profiles = Container.defaultProfiles,
   }) {
-    if (!override && _registered.containsKey(ContainerKey(t, name))) {
-      throw Exception(
-          "A value is already registered for type $t and name $name");
+    if (_contaienrConfiguration == null ||
+        _contaienrConfiguration!.isPresent(t)) {
+      if (!override && _registered.containsKey(ContainerKey(t, name))) {
+        throw Exception(
+            "A value is already registered for type $t and name $name");
+      }
+      _registered[ContainerKey(t, name)] =
+          ContainerObject(object as Object, ObjectType.simple, profiles);
     }
-    _registered[ContainerKey(t, name)] =
-        ContainerObject(object as Object, ObjectType.simple, profiles);
   }
 
   void register<T>({
