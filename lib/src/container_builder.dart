@@ -9,6 +9,7 @@ class ContainerBuilder {
     T Function()? builder,
     T Function()? factory,
     bool override = false,
+    bool autoStart = false,
     String name = "",
     List<String> profiles = Container.defaultProfiles,
   }) {
@@ -19,6 +20,7 @@ class ContainerBuilder {
       override: override,
       name: name,
       profiles: profiles,
+      autoStart: autoStart,
     );
     return this;
   }
@@ -29,6 +31,7 @@ class ContainerBuilder {
     dynamic Function()? builder,
     dynamic Function()? factory,
     bool override = false,
+    bool autoStart = false,
     String name = "",
     List<String> profiles = Container.defaultProfiles,
   }) {
@@ -40,6 +43,7 @@ class ContainerBuilder {
       override: override,
       name: name,
       profiles: profiles,
+      autoStart: autoStart,
     );
     return this;
   }
