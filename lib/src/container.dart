@@ -274,7 +274,7 @@ class Container {
   void autoStart() {
     for (var key in _registered.keys) {
       var obj = _registered[key];
-      if (obj!.autoStart) {
+      if (obj!.autoStart && obj.profiles.contains(_profile)) {
         _findAndBuildImpl(key.type, name: key.name);
       }
     }
