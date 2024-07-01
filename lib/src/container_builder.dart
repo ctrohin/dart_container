@@ -79,4 +79,34 @@ class ContainerBuilder {
     Container().autoStart();
     return this;
   }
+
+  ContainerBuilder withObjects(
+    Map<Type, dynamic> objects, {
+    List<String> profiles = Container.defaultProfiles,
+  }) {
+    for (var mapEntry in objects.entries) {
+      registerTyped(mapEntry.key, object: mapEntry.value, profiles: profiles);
+    }
+    return this;
+  }
+
+  ContainerBuilder withBuilders(
+    Map<Type, Function()> builders, {
+    List<String> profiles = Container.defaultProfiles,
+  }) {
+    for (var mapEntry in builders.entries) {
+      registerTyped(mapEntry.key, builder: mapEntry.value, profiles: profiles);
+    }
+    return this;
+  }
+
+  ContainerBuilder withFactories(
+    Map<Type, Function()> factories, {
+    List<String> profiles = Container.defaultProfiles,
+  }) {
+    for (var mapEntry in factories.entries) {
+      registerTyped(mapEntry.key, factory: mapEntry.value, profiles: profiles);
+    }
+    return this;
+  }
 }
