@@ -4,11 +4,12 @@ class ContainerObject {
   final Object object;
   final ObjectType objectType;
   final List<String> profiles;
+  final bool autoStart;
 
-  ContainerObject(this.object, this.objectType, this.profiles);
+  ContainerObject(this.object, this.objectType, this.profiles, this.autoStart);
 
   @override
   String toString() {
-    return "type=$objectType object=$object profiles=$profiles";
+    return "type=$objectType object=$object profiles=$profiles autoStart=$autoStart";
   }
 }

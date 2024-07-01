@@ -1,3 +1,4 @@
+import 'package:dart_container/src/auto_start.dart';
 import 'package:dart_container/src/container_configuration.dart';
 import 'package:dart_container/src/container_key.dart';
 import 'package:dart_container/src/container_object.dart';
@@ -45,6 +46,7 @@ class Container {
     Type t, {
     dynamic object,
     bool override = false,
+    bool autoStart = false,
     String name = "",
     List<String> profiles = Container.defaultProfiles,
   }) {
@@ -54,8 +56,8 @@ class Container {
         throw Exception(
             "A value is already registered for type $t and name $name");
       }
-      _registered[ContainerKey(t, name)] =
-          ContainerObject(object as Object, ObjectType.simple, profiles);
+      _registered[ContainerKey(t, name)] = ContainerObject(
+          object as Object, ObjectType.simple, profiles, autoStart);
     }
   }
 
@@ -64,6 +66,7 @@ class Container {
     T Function()? builder,
     T Function()? factory,
     bool override = false,
+    bool autoStart = false,
     String name = "",
     List<String> profiles = Container.defaultProfiles,
   }) {
@@ -72,6 +75,7 @@ class Container {
         builder: builder,
         factory: factory,
         override: override,
+        autoStart: autoStart,
         name: name,
         profiles: profiles);
   }
@@ -82,6 +86,7 @@ class Container {
     dynamic Function()? builder,
     dynamic Function()? factory,
     bool override = false,
+    bool autoStart = false,
     String name = "",
     List<String> profiles = Container.defaultProfiles,
   }) {
@@ -109,16 +114,34 @@ class Container {
     }
     switch (objType) {
       case ObjectType.simple:
-        _registerTyped(t,
-            object: object, override: override, name: name, profiles: profiles);
+        _registerTyped(
+          t,
+          object: object,
+          override: override,
+          name: name,
+          profiles: profiles,
+          autoStart: autoStart,
+        );
         return;
       case ObjectType.factory:
-        _registerTypedFactory(t, factory!,
-            override: override, name: name, profiles: profiles);
+        _registerTypedFactory(
+          t,
+          factory!,
+          override: override,
+          name: name,
+          profiles: profiles,
+          autoStart: autoStart,
+        );
         return;
       case ObjectType.builder:
-        _registerTypedLazy(t, builder!,
-            override: override, name: name, profiles: profiles);
+        _registerTypedLazy(
+          t,
+          builder!,
+          override: override,
+          name: name,
+          profiles: profiles,
+          autoStart: autoStart,
+        );
         return;
     }
   }
@@ -127,6 +150,7 @@ class Container {
     Type t,
     dynamic Function() builder, {
     bool override = false,
+    bool autoStart = false,
     String name = "",
     List<String> profiles = defaultProfiles,
   }) {
@@ -135,13 +159,14 @@ class Container {
           "A value is already registered for type $t and name $name");
     }
     _registered[ContainerKey(t, name)] =
-        ContainerObject(builder, ObjectType.builder, profiles);
+        ContainerObject(builder, ObjectType.builder, profiles, autoStart);
   }
 
   void _registerTypedFactory(
     Type t,
     dynamic Function() factory, {
     bool override = false,
+    bool autoStart = false,
     String name = "",
     List<String> profiles = defaultProfiles,
   }) {
@@ -150,7 +175,7 @@ class Container {
           "A value is already registered for type $t and name $name");
     }
     _registered[ContainerKey(t, name)] =
-        ContainerObject(factory, ObjectType.factory, profiles);
+        ContainerObject(factory, ObjectType.factory, profiles, autoStart);
   }
 
   T _findAndBuild<T>({String name = ""}) {
@@ -170,10 +195,15 @@ class Container {
     }
 
     T lazyObject = (existing.object as Function)() as T;
+    if (existing.autoStart && lazyObject is AutoStart) {
+      lazyObject.init();
+      (() async => lazyObject.run())();
+    }
     _registered[ContainerKey(T, name)] = ContainerObject(
       lazyObject as Object,
       ObjectType.simple,
       existing.profiles,
+      existing.autoStart,
     );
     return lazyObject;
   }
@@ -214,12 +244,12 @@ class Container {
     }
   }
 
-  T? getValueIfPresent<T>(String key) {
+  T? getValueIfPresent<T>(String key, {T? defaultValue}) {
     ValueKey vKey = ValueKey(key, _profile);
     if (_values.containsKey(vKey)) {
       return _values[vKey] as T;
     }
-    return null;
+    return defaultValue;
   }
 
   T getValue<T>(String key) {
@@ -236,4 +266,6 @@ class Container {
     _values.clear();
     _profile = defaultProfile;
   }
+
+  void autoStart() {}
 }
