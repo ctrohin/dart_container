@@ -1,5 +1,4 @@
 import 'package:dart_container/dart_container.dart';
-import 'package:dart_container/src/container.dart';
 
 class ContainerBuilder {
   const ContainerBuilder();
@@ -106,6 +105,21 @@ class ContainerBuilder {
   }) {
     for (var mapEntry in factories.entries) {
       registerTyped(mapEntry.key, factory: mapEntry.value, profiles: profiles);
+    }
+    return this;
+  }
+
+  ContainerBuilder startable(
+    Map<Type, Function()> builders, {
+    List<String> profiles = Container.defaultProfiles,
+  }) {
+    for (var mapEntry in builders.entries) {
+      registerTyped(
+        mapEntry.key,
+        builder: mapEntry.value,
+        profiles: profiles,
+        autoStart: true,
+      );
     }
     return this;
   }
