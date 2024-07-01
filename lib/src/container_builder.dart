@@ -80,7 +80,7 @@ class ContainerBuilder {
     return this;
   }
 
-  ContainerBuilder withObjects(
+  ContainerBuilder objects(
     Map<Type, dynamic> objects, {
     List<String> profiles = Container.defaultProfiles,
   }) {
@@ -90,7 +90,7 @@ class ContainerBuilder {
     return this;
   }
 
-  ContainerBuilder withBuilders(
+  ContainerBuilder builders(
     Map<Type, Function()> builders, {
     List<String> profiles = Container.defaultProfiles,
   }) {
@@ -100,7 +100,7 @@ class ContainerBuilder {
     return this;
   }
 
-  ContainerBuilder withFactories(
+  ContainerBuilder factories(
     Map<Type, Function()> factories, {
     List<String> profiles = Container.defaultProfiles,
   }) {
