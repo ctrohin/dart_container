@@ -179,27 +179,31 @@ class Container {
   }
 
   T _findAndBuild<T>({String name = ""}) {
-    ContainerObject? existing = _registered[ContainerKey(T, name)];
+    return _findAndBuildImpl(T, name: name);
+  }
+
+  dynamic _findAndBuildImpl(Type t, {String name = ""}) {
+    ContainerObject? existing = _registered[ContainerKey(t, name)];
     if (existing == null || !existing.profiles.contains(_profile)) {
       print(_registered);
       throw Exception(
-          "No object present in the container of type $T, name $name and profile $_profile");
+          "No object present in the container of type $t, name $name and profile $_profile");
     }
 
     if (existing.objectType == ObjectType.simple) {
-      return existing.object as T;
+      return existing.object;
     }
 
     if (existing.objectType == ObjectType.factory) {
-      return (existing.object as Function)() as T;
+      return (existing.object as Function)();
     }
 
-    T lazyObject = (existing.object as Function)() as T;
+    dynamic lazyObject = (existing.object as Function)();
     if (existing.autoStart && lazyObject is AutoStart) {
       lazyObject.init();
       (() async => lazyObject.run())();
     }
-    _registered[ContainerKey(T, name)] = ContainerObject(
+    _registered[ContainerKey(t, name)] = ContainerObject(
       lazyObject as Object,
       ObjectType.simple,
       existing.profiles,
@@ -267,5 +271,12 @@ class Container {
     _profile = defaultProfile;
   }
 
-  void autoStart() {}
+  void autoStart() {
+    for (var key in _registered.keys) {
+      var obj = _registered[key];
+      if (obj!.autoStart) {
+        _findAndBuildImpl(key.type, name: key.name);
+      }
+    }
+  }
 }

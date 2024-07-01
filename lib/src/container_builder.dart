@@ -70,4 +70,9 @@ class ContainerBuilder {
     Container().setConfiguration(configuration);
     return this;
   }
+
+  ContainerBuilder autoStart() {
+    Container().autoStart();
+    return this;
+  }
 }

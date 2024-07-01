@@ -1,5 +1,4 @@
 import 'package:dart_container/dart_container.dart';
-import 'package:dart_container/src/container.dart';
 
 // Helper functions
 void injectorRegister<T>({
@@ -7,6 +6,7 @@ void injectorRegister<T>({
   T Function()? builder,
   T Function()? factory,
   bool override = false,
+  bool autoStart = false,
   String name = "",
   List<String> profiles = Container.defaultProfiles,
 }) {
@@ -17,6 +17,7 @@ void injectorRegister<T>({
     override: override,
     name: name,
     profiles: profiles,
+    autoStart: autoStart,
   );
 }
 
@@ -26,6 +27,7 @@ void injectorRegisterTyped(
   dynamic Function()? builder,
   dynamic Function()? factory,
   bool override = false,
+  bool autoStart = false,
   String name = "",
   List<String> profiles = Container.defaultProfiles,
 }) {
@@ -37,6 +39,7 @@ void injectorRegisterTyped(
     override: override,
     name: name,
     profiles: profiles,
+    autoStart: autoStart,
   );
 }
 
@@ -79,6 +82,10 @@ String injectorGetProfile() {
   return Container().getProfile();
 }
 
-void setConfiguration(ContainerConfiguration config) {
+void injectorSetConfiguration(ContainerConfiguration config) {
   Container().setConfiguration(config);
+}
+
+void injectorAutoStart() {
+  Container().autoStart();
 }
