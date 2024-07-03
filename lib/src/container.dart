@@ -21,6 +21,7 @@ class Container {
 
   Container._internal();
 
+// ============ PUBLIC METHODS ======================
   Container profile(String newProfile) {
     if (_profile == defaultProfile) {
       _profile = newProfile;
@@ -42,25 +43,6 @@ class Container {
 
   String getProfile() {
     return _profile;
-  }
-
-  void _registerTyped(
-    Type t, {
-    dynamic object,
-    bool override = false,
-    bool autoStart = false,
-    String name = "",
-    List<String> profiles = Container.defaultProfiles,
-  }) {
-    if (_containerConfiguration == null ||
-        _containerConfiguration!.isPresent(t)) {
-      if (!override && _registered.containsKey(ContainerKey(t, name))) {
-        throw Exception(
-            "A value is already registered for type $t and name $name");
-      }
-      _registered[ContainerKey(t, name)] = ContainerObject(
-          object as Object, ObjectType.simple, profiles, autoStart);
-    }
   }
 
   Container generic<T>({
@@ -148,72 +130,6 @@ class Container {
         break;
     }
     return this;
-  }
-
-  void _registerTypedLazy(
-    Type t,
-    dynamic Function() builder, {
-    bool override = false,
-    bool autoStart = false,
-    String name = "",
-    List<String> profiles = defaultProfiles,
-  }) {
-    if (!override && _registered.containsKey(ContainerKey(t, name))) {
-      throw Exception(
-          "A value is already registered for type $t and name $name");
-    }
-    _registered[ContainerKey(t, name)] =
-        ContainerObject(builder, ObjectType.builder, profiles, autoStart);
-  }
-
-  void _registerTypedFactory(
-    Type t,
-    dynamic Function() factory, {
-    bool override = false,
-    bool autoStart = false,
-    String name = "",
-    List<String> profiles = defaultProfiles,
-  }) {
-    if (!override && _registered.containsKey(ContainerKey(t, name))) {
-      throw Exception(
-          "A value is already registered for type $t and name $name");
-    }
-    _registered[ContainerKey(t, name)] =
-        ContainerObject(factory, ObjectType.factory, profiles, autoStart);
-  }
-
-  T _findAndBuild<T>({String name = ""}) {
-    return _findAndBuildImpl(T, name: name);
-  }
-
-  dynamic _findAndBuildImpl(Type t, {String name = ""}) {
-    ContainerObject? existing = _registered[ContainerKey(t, name)];
-    if (existing == null || !existing.profiles.contains(_profile)) {
-      print(_registered);
-      throw Exception(
-          "No object present in the container of type $t, name $name and profile $_profile");
-    }
-
-    if (existing.objectType == ObjectType.simple) {
-      return existing.object;
-    }
-
-    if (existing.objectType == ObjectType.factory) {
-      return (existing.object as Function)();
-    }
-
-    dynamic lazyObject = (existing.object as Function)();
-    if (existing.autoStart && lazyObject is AutoStart) {
-      lazyObject.init();
-      (() async => lazyObject.run())();
-    }
-    _registered[ContainerKey(t, name)] = ContainerObject(
-      lazyObject as Object,
-      ObjectType.simple,
-      existing.profiles,
-      existing.autoStart,
-    );
-    return lazyObject;
   }
 
   T get<T>({String name = ""}) {
@@ -331,5 +247,92 @@ class Container {
       );
     }
     return this;
+  }
+
+//================== PRIVATE METHODS =================
+
+  T _findAndBuild<T>({String name = ""}) {
+    return _findAndBuildImpl(T, name: name);
+  }
+
+  dynamic _findAndBuildImpl(Type t, {String name = ""}) {
+    ContainerObject? existing = _registered[ContainerKey(t, name)];
+    if (existing == null || !existing.profiles.contains(_profile)) {
+      print(_registered);
+      throw Exception(
+          "No object present in the container of type $t, name $name and profile $_profile");
+    }
+
+    if (existing.objectType == ObjectType.simple) {
+      return existing.object;
+    }
+
+    if (existing.objectType == ObjectType.factory) {
+      return (existing.object as Function)();
+    }
+
+    dynamic lazyObject = (existing.object as Function)();
+    if (existing.autoStart && lazyObject is AutoStart) {
+      lazyObject.init();
+      (() async => lazyObject.run())();
+    }
+    _registered[ContainerKey(t, name)] = ContainerObject(
+      lazyObject as Object,
+      ObjectType.simple,
+      existing.profiles,
+      existing.autoStart,
+    );
+    return lazyObject;
+  }
+
+  void _registerTypedLazy(
+    Type t,
+    dynamic Function() builder, {
+    bool override = false,
+    bool autoStart = false,
+    String name = "",
+    List<String> profiles = defaultProfiles,
+  }) {
+    if (!override && _registered.containsKey(ContainerKey(t, name))) {
+      throw Exception(
+          "A value is already registered for type $t and name $name");
+    }
+    _registered[ContainerKey(t, name)] =
+        ContainerObject(builder, ObjectType.builder, profiles, autoStart);
+  }
+
+  void _registerTypedFactory(
+    Type t,
+    dynamic Function() factory, {
+    bool override = false,
+    bool autoStart = false,
+    String name = "",
+    List<String> profiles = defaultProfiles,
+  }) {
+    if (!override && _registered.containsKey(ContainerKey(t, name))) {
+      throw Exception(
+          "A value is already registered for type $t and name $name");
+    }
+    _registered[ContainerKey(t, name)] =
+        ContainerObject(factory, ObjectType.factory, profiles, autoStart);
+  }
+
+  void _registerTyped(
+    Type t, {
+    dynamic object,
+    bool override = false,
+    bool autoStart = false,
+    String name = "",
+    List<String> profiles = Container.defaultProfiles,
+  }) {
+    if (_containerConfiguration == null ||
+        _containerConfiguration!.isPresent(t)) {
+      if (!override && _registered.containsKey(ContainerKey(t, name))) {
+        throw Exception(
+            "A value is already registered for type $t and name $name");
+      }
+      _registered[ContainerKey(t, name)] = ContainerObject(
+          object as Object, ObjectType.simple, profiles, autoStart);
+    }
   }
 }
