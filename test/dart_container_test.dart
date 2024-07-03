@@ -1,5 +1,4 @@
-import 'package:dart_container/src/container.dart';
-import 'package:dart_container/src/dart_container_base.dart';
+import 'package:dart_container/dart_container.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -49,7 +48,7 @@ void main() {
         injectorGet<String>();
         assert(false, true);
       } catch (e) {
-        assert(e is Exception, true);
+        assert(e is ContainerException, true);
       }
     });
   });
@@ -94,7 +93,7 @@ void main() {
         injectorGetValue<String>("test");
         expect(false, true);
       } catch (e) {
-        expect(e is Exception, true);
+        expect(e is ContainerException, true);
       }
     });
 
@@ -132,7 +131,7 @@ void main() {
         injectorGet<String>();
         expect(true, false);
       } catch (e) {
-        expect(e is Exception, true);
+        expect(e is ContainerException, true);
       }
     });
 
@@ -147,7 +146,7 @@ void main() {
         injectorSetProfile("test1");
         expect(false, true);
       } catch (e) {
-        expect(e is Exception, true);
+        expect(e is ContainerException, true);
       }
     });
   });

@@ -1,5 +1,4 @@
-import 'package:dart_container/src/auto_start.dart';
-import 'package:dart_container/src/container_configuration.dart';
+import 'package:dart_container/dart_container.dart';
 import 'package:dart_container/src/container_key.dart';
 import 'package:dart_container/src/container_object.dart';
 import 'package:dart_container/src/object_type.dart';
@@ -22,19 +21,24 @@ class Container {
   Container._internal();
 
 // ============ PUBLIC METHODS ======================
+
+  /// Sets the container profile to be used to [newProfile]. Throws [ContainerException] if profile is already set
   Container profile(String newProfile) {
     if (_profile == defaultProfile) {
       _profile = newProfile;
     } else {
-      throw Exception(
+      throw ContainerException(
           "Profile $_profile is already active! Another profile cannot be selected while running!");
     }
     return this;
   }
 
+  /// Sets the container configuration to [configuration].
+  /// Throws [Exception] if the container is already populated, since the configuration
+  /// can no longer be enforced.
   Container configuration(ContainerConfiguration configuration) {
     if (_registered.isNotEmpty) {
-      throw Exception(
+      throw ContainerException(
           "Cannot set the configuration after object have already been injected");
     }
     _containerConfiguration = configuration;
@@ -90,11 +94,11 @@ class Container {
       objType = ObjectType.factory;
     }
     if (count == 0) {
-      throw Exception(
+      throw ContainerException(
           "You must specify one of the 'object', 'builder' or 'factory' parameters");
     }
     if (count > 1) {
-      throw Exception(
+      throw ContainerException(
           "You can only specify one of the 'object', 'builder' or 'factory' parameters");
     }
     switch (objType) {
@@ -135,7 +139,7 @@ class Container {
   T get<T>({String name = ""}) {
     if (!_registered.containsKey(ContainerKey(T, name))) {
       print(_registered);
-      throw Exception(
+      throw ContainerException(
           "No object of type $T and name $name found in the container");
     }
     return _findAndBuild<T>(name: name);
@@ -181,7 +185,7 @@ class Container {
   T getValue<T>(String key) {
     ValueKey vKey = ValueKey(key, _profile);
     if (!_values.containsKey(vKey)) {
-      throw Exception(
+      throw ContainerException(
           "No value was provided for key $key and profile $_profile");
     }
     return _values[vKey] as T;
@@ -259,7 +263,7 @@ class Container {
     ContainerObject? existing = _registered[ContainerKey(t, name)];
     if (existing == null || !existing.profiles.contains(_profile)) {
       print(_registered);
-      throw Exception(
+      throw ContainerException(
           "No object present in the container of type $t, name $name and profile $_profile");
     }
 
@@ -294,7 +298,7 @@ class Container {
     List<String> profiles = defaultProfiles,
   }) {
     if (!override && _registered.containsKey(ContainerKey(t, name))) {
-      throw Exception(
+      throw ContainerException(
           "A value is already registered for type $t and name $name");
     }
     _registered[ContainerKey(t, name)] =
@@ -310,7 +314,7 @@ class Container {
     List<String> profiles = defaultProfiles,
   }) {
     if (!override && _registered.containsKey(ContainerKey(t, name))) {
-      throw Exception(
+      throw ContainerException(
           "A value is already registered for type $t and name $name");
     }
     _registered[ContainerKey(t, name)] =
@@ -328,7 +332,7 @@ class Container {
     if (_containerConfiguration == null ||
         _containerConfiguration!.isPresent(t)) {
       if (!override && _registered.containsKey(ContainerKey(t, name))) {
-        throw Exception(
+        throw ContainerException(
             "A value is already registered for type $t and name $name");
       }
       _registered[ContainerKey(t, name)] = ContainerObject(
