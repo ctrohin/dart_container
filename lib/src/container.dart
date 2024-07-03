@@ -11,7 +11,7 @@ class Container {
   static const String defaultProfile = "default";
   static const List<String> defaultProfiles = <String>[defaultProfile];
   String _profile = defaultProfile;
-  ContainerConfiguration? _contaienrConfiguration;
+  ContainerConfiguration? _containerConfiguration;
 
   static final Container _singleton = Container._internal();
 
@@ -21,21 +21,23 @@ class Container {
 
   Container._internal();
 
-  void setProfile(String newProfile) {
+  Container profile(String newProfile) {
     if (_profile == defaultProfile) {
       _profile = newProfile;
     } else {
       throw Exception(
           "Profile $_profile is already active! Another profile cannot be selected while running!");
     }
+    return this;
   }
 
-  void setConfiguration(ContainerConfiguration configuration) {
+  Container configuration(ContainerConfiguration configuration) {
     if (_registered.isNotEmpty) {
       throw Exception(
           "Cannot set the configuration after object have already been injected");
     }
-    _contaienrConfiguration = configuration;
+    _containerConfiguration = configuration;
+    return this;
   }
 
   String getProfile() {
@@ -50,8 +52,8 @@ class Container {
     String name = "",
     List<String> profiles = Container.defaultProfiles,
   }) {
-    if (_contaienrConfiguration == null ||
-        _contaienrConfiguration!.isPresent(t)) {
+    if (_containerConfiguration == null ||
+        _containerConfiguration!.isPresent(t)) {
       if (!override && _registered.containsKey(ContainerKey(t, name))) {
         throw Exception(
             "A value is already registered for type $t and name $name");
@@ -61,7 +63,7 @@ class Container {
     }
   }
 
-  void register<T>({
+  Container generic<T>({
     T? object,
     T Function()? builder,
     T Function()? factory,
@@ -70,7 +72,7 @@ class Container {
     String name = "",
     List<String> profiles = Container.defaultProfiles,
   }) {
-    registerTyped(T,
+    typed(T,
         object: object,
         builder: builder,
         factory: factory,
@@ -78,9 +80,10 @@ class Container {
         autoStart: autoStart,
         name: name,
         profiles: profiles);
+    return this;
   }
 
-  void registerTyped(
+  Container typed(
     Type t, {
     dynamic object,
     dynamic Function()? builder,
@@ -122,7 +125,7 @@ class Container {
           profiles: profiles,
           autoStart: autoStart,
         );
-        return;
+        break;
       case ObjectType.factory:
         _registerTypedFactory(
           t,
@@ -132,7 +135,7 @@ class Container {
           profiles: profiles,
           autoStart: autoStart,
         );
-        return;
+        break;
       case ObjectType.builder:
         _registerTypedLazy(
           t,
@@ -142,8 +145,9 @@ class Container {
           profiles: profiles,
           autoStart: autoStart,
         );
-        return;
+        break;
     }
+    return this;
   }
 
   void _registerTypedLazy(
@@ -232,20 +236,22 @@ class Container {
     return null;
   }
 
-  void registerValues(Map<String, dynamic> values,
+  Container values(Map<String, dynamic> values,
       {List<String> profiles = defaultProfiles}) {
     values.forEach((key, value) {
       for (var profile in profiles) {
         _values[ValueKey(key, profile)] = value;
       }
     });
+    return this;
   }
 
-  void registerValue(String key, dynamic value,
+  Container value(String key, dynamic value,
       {List<String> profiles = defaultProfiles}) {
     for (var profile in profiles) {
       _values[ValueKey(key, profile)] = value;
     }
+    return this;
   }
 
   T? getValueIfPresent<T>(String key, {T? defaultValue}) {
@@ -265,18 +271,65 @@ class Container {
     return _values[vKey] as T;
   }
 
-  void clear() {
+  Container clear() {
     _registered.clear();
     _values.clear();
     _profile = defaultProfile;
+    return this;
   }
 
-  void autoStart() {
+  Container autoStart() {
     for (var key in _registered.keys) {
       var obj = _registered[key];
       if (obj!.autoStart && obj.profiles.contains(_profile)) {
         _findAndBuildImpl(key.type, name: key.name);
       }
     }
+    return this;
+  }
+
+  Container objects(
+    Map<Type, dynamic> objects, {
+    List<String> profiles = Container.defaultProfiles,
+  }) {
+    for (var mapEntry in objects.entries) {
+      typed(mapEntry.key, object: mapEntry.value, profiles: profiles);
+    }
+    return this;
+  }
+
+  Container builders(
+    Map<Type, Function()> builders, {
+    List<String> profiles = Container.defaultProfiles,
+  }) {
+    for (var mapEntry in builders.entries) {
+      typed(mapEntry.key, builder: mapEntry.value, profiles: profiles);
+    }
+    return this;
+  }
+
+  Container factories(
+    Map<Type, Function()> factories, {
+    List<String> profiles = Container.defaultProfiles,
+  }) {
+    for (var mapEntry in factories.entries) {
+      typed(mapEntry.key, factory: mapEntry.value, profiles: profiles);
+    }
+    return this;
+  }
+
+  Container startable(
+    Map<Type, Function()> builders, {
+    List<String> profiles = Container.defaultProfiles,
+  }) {
+    for (var mapEntry in builders.entries) {
+      typed(
+        mapEntry.key,
+        builder: mapEntry.value,
+        profiles: profiles,
+        autoStart: true,
+      );
+    }
+    return this;
   }
 }

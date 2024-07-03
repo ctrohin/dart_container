@@ -1,5 +1,4 @@
 import 'package:dart_container/src/container.dart';
-import 'package:dart_container/src/container_builder.dart';
 import 'package:dart_container/src/dart_container_base.dart';
 import 'package:test/test.dart';
 
@@ -110,14 +109,14 @@ void main() {
     });
 
     test('Test register with profile inject for profile', () {
-      ContainerBuilder().register(
+      Container().generic(
         object: "Test",
         profiles: ["Test"],
-      ).register(
+      ).generic(
         object: "Test",
         name: "testName",
         profiles: ["Test1"],
-      ).setProfile("Test");
+      ).profile("Test");
       expect(injectorGet<String>(), "Test");
       expect(injectorGetIfPresent<String>(name: "testName"), null);
     });
@@ -125,10 +124,10 @@ void main() {
     test(
         'Test register with profile inject for profile throws exception when different profile',
         () {
-      ContainerBuilder().register(
+      Container().generic(
         object: "Test",
         profiles: ["Test"],
-      ).setProfile("Test1");
+      ).profile("Test1");
       try {
         injectorGet<String>();
         expect(true, false);

@@ -10,7 +10,7 @@ void injectorRegister<T>({
   String name = "",
   List<String> profiles = Container.defaultProfiles,
 }) {
-  Container().register<T>(
+  Container().generic<T>(
     object: object,
     builder: builder,
     factory: factory,
@@ -31,7 +31,7 @@ void injectorRegisterTyped(
   String name = "",
   List<String> profiles = Container.defaultProfiles,
 }) {
-  Container().registerTyped(
+  Container().typed(
     t,
     object: object,
     builder: builder,
@@ -56,14 +56,14 @@ void injectorProvideValue(
   dynamic value, {
   List<String> profiles = Container.defaultProfiles,
 }) {
-  Container().registerValue(key, value, profiles: profiles);
+  Container().value(key, value, profiles: profiles);
 }
 
 void injectorProvideValues(
   Map<String, dynamic> values, {
   List<String> profiles = Container.defaultProfiles,
 }) {
-  Container().registerValues(values, profiles: profiles);
+  Container().values(values, profiles: profiles);
 }
 
 T injectorGetValue<T>(String key) {
@@ -75,7 +75,7 @@ T? injectorGetValueIfPresent<T>(String key) {
 }
 
 void injectorSetProfile(String profile) {
-  Container().setProfile(profile);
+  Container().profile(profile);
 }
 
 String injectorGetProfile() {
@@ -83,7 +83,7 @@ String injectorGetProfile() {
 }
 
 void injectorSetConfiguration(ContainerConfiguration config) {
-  Container().setConfiguration(config);
+  Container().configuration(config);
 }
 
 void injectorAutoStart() {
