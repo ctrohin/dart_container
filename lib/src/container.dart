@@ -1,8 +1,15 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:dart_container/dart_container.dart';
 import 'package:dart_container/src/container_key.dart';
 import 'package:dart_container/src/container_object.dart';
 import 'package:dart_container/src/object_type.dart';
 import 'package:dart_container/src/value_key.dart';
+import 'package:dart_container/src/web_server.dart';
+import 'package:dart_container/src/web_server_config.dart';
+import 'package:dart_router_extended/dart_router_extended.dart';
+import 'package:shelf/shelf.dart';
 
 class Container {
   final Map<ContainerKey, ContainerObject> _registered = {};
@@ -11,6 +18,7 @@ class Container {
   static const List<String> defaultProfiles = <String>[defaultProfile];
   String _profile = defaultProfile;
   ContainerConfiguration? _containerConfiguration;
+  WebServerConfig? _webServerConfig;
 
   static final Container _singleton = Container._internal();
 
@@ -250,6 +258,50 @@ class Container {
         autoStart: true,
       );
     }
+    return this;
+  }
+
+  Container webServerConfig(
+    FutureOr<Response> Function(Request) notFoundHandler,
+    Object address,
+    int port, {
+    SecurityContext? securityContext,
+    int? backlog,
+    bool shared = false,
+    List<String> profiles = defaultProfiles,
+  }) {
+    _webServerConfig = WebServerConfig(
+      notFoundHandler,
+      address,
+      port,
+      securityContext: securityContext,
+      backlog: backlog,
+      shared: shared,
+    );
+    typed(
+      WebServer,
+      builder: () => WebServer(_webServerConfig!),
+      autoStart: true,
+      profiles: profiles,
+    );
+    return this;
+  }
+
+  Container controllers(List<Controller> controllers) {
+    if (_webServerConfig == null) {
+      throw ContainerException(
+          "WebServerConfiguration not present. Call .webServerConfig before adding controllers");
+    }
+    _webServerConfig!.addControllers(controllers);
+    return this;
+  }
+
+  Container routes(List<AbstractRoute> routes) {
+    if (_webServerConfig == null) {
+      throw ContainerException(
+          "WebServerConfiguration not present. Call .webServerConfig before adding routes");
+    }
+    _webServerConfig!.addRoutes(routes);
     return this;
   }
 
