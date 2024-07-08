@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:dart_container/dart_container.dart';
 
 class WebServer extends AutoStart {
   final WebServerConfig config;
   late Router router;
+  late HttpServer server;
 
   WebServer(this.config);
 
@@ -17,10 +20,12 @@ class WebServer extends AutoStart {
     }
     router = routeBuilder.getRouter();
 
-    var handler =
-        const Pipeline().addMiddleware(logRequests()).addHandler(router.call);
+    var handler = const Pipeline()
+        .addMiddleware(logRequests())
+        .addMiddleware(cors)
+        .addHandler(router.call);
 
-    var server = await serve(
+    server = await serve(
       handler,
       config.address,
       config.port,
@@ -33,5 +38,29 @@ class WebServer extends AutoStart {
     server.autoCompress = true;
 
     print('Serving at http://${server.address.host}:${server.port}');
+  }
+
+  Handler cors(Handler innerHandler) {
+    if (config.staticCorsHeaders != null && config.corsBuilder != null) {
+      throw ContainerException(
+          "Conflict! You can either specify static cors headers, or a cors builder");
+    }
+    return (request) async {
+      final response = await innerHandler(request);
+      // Set CORS when responding to OPTIONS request
+      if (request.method == 'OPTIONS') {
+        var corsHeaders = config.corsBuilder != null
+            ? config.corsBuilder!(request)
+            : config.staticCorsHeaders;
+        return Response.ok('', headers: corsHeaders);
+      }
+
+      // Move onto handler
+      return response;
+    };
+  }
+
+  void stop({bool force = false}) {
+    server.close(force: force);
   }
 }

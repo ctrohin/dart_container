@@ -12,6 +12,8 @@ class WebServerConfig {
   final FutureOr<Response> Function(Request) notFoundHanlder;
   final List<Controller> controllers = [];
   final List<AbstractRoute> routes = [];
+  final Map<String, Object>? staticCorsHeaders;
+  final Map<String, Object> Function(Request)? corsBuilder;
   WebServerConfig(
     this.notFoundHanlder,
     this.address,
@@ -19,6 +21,8 @@ class WebServerConfig {
     this.securityContext,
     this.backlog,
     this.shared = false,
+    this.staticCorsHeaders,
+    this.corsBuilder,
   });
 
   void addControllers(List<Controller> controllers) {
