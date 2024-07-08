@@ -1,9 +1,4 @@
 import 'package:dart_container/dart_container.dart';
-import 'package:dart_container/src/web_server_config.dart';
-import 'package:dart_router_extended/dart_router_extended.dart';
-import 'package:shelf/shelf.dart';
-import 'package:shelf_router/shelf_router.dart';
-import 'package:shelf/shelf_io.dart' as shelf_io;
 
 class WebServer extends AutoStart {
   final WebServerConfig config;
@@ -25,7 +20,7 @@ class WebServer extends AutoStart {
     var handler =
         const Pipeline().addMiddleware(logRequests()).addHandler(router.call);
 
-    var server = await shelf_io.serve(
+    var server = await serve(
       handler,
       config.address,
       config.port,

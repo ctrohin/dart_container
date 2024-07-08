@@ -6,10 +6,6 @@ import 'package:dart_container/src/container_key.dart';
 import 'package:dart_container/src/container_object.dart';
 import 'package:dart_container/src/object_type.dart';
 import 'package:dart_container/src/value_key.dart';
-import 'package:dart_container/src/web_server.dart';
-import 'package:dart_container/src/web_server_config.dart';
-import 'package:dart_router_extended/dart_router_extended.dart';
-import 'package:shelf/shelf.dart';
 
 class Container {
   final Map<ContainerKey, ContainerObject> _registered = {};

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dart_router_extended/dart_router_extended.dart';
-import 'package:shelf/shelf.dart';
 
 class WebServerConfig {
   final Object address;
