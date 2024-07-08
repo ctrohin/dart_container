@@ -34,14 +34,4 @@ class WebServer extends AutoStart {
 
     print('Serving at http://${server.address.host}:${server.port}');
   }
-
-  Response _getStatus(Request request) {
-    return Response.ok(
-        "Status response. Time is ${DateTime.now().toIso8601String()}");
-  }
-
-  Response _notFound(Request request) {
-    return Response.notFound(
-        "Route not found for ${request.method}:${request.requestedUri}");
-  }
 }
