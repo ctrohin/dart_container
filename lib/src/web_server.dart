@@ -22,7 +22,8 @@ class WebServer extends AutoStart {
 
     var handler = const Pipeline()
         .addMiddleware(logRequests())
-        .addMiddleware(cors)
+        .addMiddleware(_cors)
+        .addMiddleware(_security)
         .addHandler(router.call);
 
     server = await serve(
@@ -40,7 +41,22 @@ class WebServer extends AutoStart {
     print('Serving at http://${server.address.host}:${server.port}');
   }
 
-  Handler cors(Handler innerHandler) {
+  Handler _security(Handler innerHandler) {
+    return (request) async {
+      var validationFn = config.routeGuard == null
+          ? config.routeGuardHandler
+          : config.routeGuard!.isSecure;
+
+      if (validationFn!(request)) {
+        final response = await innerHandler(request);
+        return response;
+      } else {
+        return Response.forbidden("");
+      }
+    };
+  }
+
+  Handler _cors(Handler innerHandler) {
     if (config.staticCorsHeaders != null && config.corsBuilder != null) {
       throw ContainerException(
           "Conflict! You can either specify static cors headers, or a cors builder");

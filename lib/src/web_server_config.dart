@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:dart_container/src/route_guard.dart';
 import 'package:dart_router_extended/dart_router_extended.dart';
 
 class WebServerConfig {
@@ -14,6 +15,8 @@ class WebServerConfig {
   final List<AbstractRoute> routes = [];
   final Map<String, Object>? staticCorsHeaders;
   final Map<String, Object> Function(Request)? corsBuilder;
+  late RouteGuard? routeGuard;
+  final bool Function(Request)? routeGuardHandler;
   WebServerConfig(
     this.notFoundHanlder,
     this.address,
@@ -23,7 +26,13 @@ class WebServerConfig {
     this.shared = false,
     this.staticCorsHeaders,
     this.corsBuilder,
-  });
+    this.routeGuard,
+    this.routeGuardHandler,
+  }) {
+    if (routeGuard == null && routeGuardHandler == null) {
+      routeGuard = DefaultRouteGuard();
+    }
+  }
 
   void addControllers(List<Controller> controllers) {
     this.controllers.addAll(controllers);
