@@ -11,3 +11,4 @@ export 'src/auto_start.dart';
 export 'src/container_exception.dart';
 export 'src/web_server.dart';
 export 'src/web_server_config.dart';
+export 'package:dart_router_extended/dart_router_extended.dart';
