@@ -42,6 +42,7 @@ class WebServer extends AutoStart {
   }
 
   Handler _security(Handler innerHandler) {
+    print(innerHandler);
     return (request) async {
       var validationFn = config.routeGuard == null
           ? config.routeGuardHandler
