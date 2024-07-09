@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:dart_container/src/route_guard.dart';
 import 'package:dart_router_extended/dart_router_extended.dart';
 
 class WebServerConfig {
