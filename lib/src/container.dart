@@ -265,6 +265,10 @@ class Container {
     int? backlog,
     bool shared = false,
     List<String> profiles = defaultProfiles,
+    Map<String, Object> Function(Request)? corsBuilder,
+    Map<String, Object>? staticCorsHeaders,
+    RouteGuard? routeGuard,
+    bool Function(Request)? routeGuardHandler,
   }) {
     _webServerConfig = WebServerConfig(
       notFoundHandler,
@@ -273,6 +277,10 @@ class Container {
       securityContext: securityContext,
       backlog: backlog,
       shared: shared,
+      corsBuilder: corsBuilder,
+      staticCorsHeaders: staticCorsHeaders,
+      routeGuard: routeGuard,
+      routeGuardHandler: routeGuardHandler,
     );
     typed(
       WebServer,
