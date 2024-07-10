@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:dart_container/src/container_exception.dart';
+import 'package:dart_container/src/cors_configuration.dart';
 import 'package:dart_router_extended/dart_router_extended.dart';
 
 class WebServerConfig {
@@ -13,7 +15,7 @@ class WebServerConfig {
   final List<Controller> controllers = [];
   final List<AbstractRoute> routes = [];
   final Map<String, Object>? staticCorsHeaders;
-  final Map<String, Object> Function(Request)? corsBuilder;
+  final CorsConfiguration? corsBuilder;
   late RouteGuard? routeGuard;
   final bool Function(Request)? routeGuardHandler;
   WebServerConfig(
@@ -28,6 +30,10 @@ class WebServerConfig {
     this.routeGuard,
     this.routeGuardHandler,
   }) {
+    if (corsBuilder != null && staticCorsHeaders != null) {
+      throw ContainerException(
+          "Please specify one of corsBuilder or staticCorsHeaders. Cannot use both");
+    }
     if (routeGuard == null && routeGuardHandler == null) {
       routeGuard = DefaultRouteGuard();
     }

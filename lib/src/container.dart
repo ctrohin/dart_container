@@ -265,7 +265,7 @@ class Container {
     int? backlog,
     bool shared = false,
     List<String> profiles = defaultProfiles,
-    Map<String, Object> Function(Request)? corsBuilder,
+    CorsConfiguration? corsBuilder,
     Map<String, Object>? staticCorsHeaders,
     RouteGuard? routeGuard,
     bool Function(Request)? routeGuardHandler,

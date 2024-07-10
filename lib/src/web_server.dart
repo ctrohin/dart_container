@@ -52,7 +52,7 @@ class WebServer extends AutoStart {
         final response = await innerHandler(request);
         return response;
       } else {
-        return Response.forbidden("");
+        return Response.unauthorized("");
       }
     };
   }
@@ -67,7 +67,7 @@ class WebServer extends AutoStart {
       // Set CORS when responding to OPTIONS request
       if (request.method == 'OPTIONS') {
         var corsHeaders = config.corsBuilder != null
-            ? config.corsBuilder!(request)
+            ? config.corsBuilder!.headers(request)
             : config.staticCorsHeaders;
         return Response.ok('', headers: corsHeaders);
       }
