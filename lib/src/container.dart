@@ -16,13 +16,13 @@ class Container {
   ContainerConfiguration? _containerConfiguration;
   WebServerConfig? _webServerConfig;
 
-  static final Container _singleton = Container._internal();
+  static final Container _instance = Container._construct();
 
   factory Container() {
-    return _singleton;
+    return _instance;
   }
 
-  Container._internal();
+  Container._construct();
 
 // ============ PUBLIC METHODS ======================
 
@@ -53,6 +53,11 @@ class Container {
     return _profile;
   }
 
+  /// Registers [object], [builder] or [factory] in the container for an
+  /// optional [name] and optional list of [profiles] with [autoStart] for the
+  /// type of the given [object]/[builder]/[factory]. [override] notifies the
+  /// container that if an entity is already defined for the generic type, it is
+  /// safe to override it
   Container generic<T>({
     T? object,
     T Function()? builder,
@@ -73,6 +78,13 @@ class Container {
     return this;
   }
 
+  /// Registers [object], [builder] or [factory] in the container for an
+  /// optional [name] and optional list of [profiles] with [autoStart] for the
+  /// type [t]. [override] notifies the
+  /// container that if an entity is already defined for the generic type, it is
+  /// safe to override it. This method is meant to be used for objects implementing
+  /// interfaces.
+  /// Example: typed(ServiceInterface, builder: () => Service())
   Container typed(
     Type t, {
     dynamic object,
@@ -105,38 +117,30 @@ class Container {
       throw ContainerException(
           "You can only specify one of the 'object', 'builder' or 'factory' parameters");
     }
+    Function fn;
+    dynamic obj;
     switch (objType) {
       case ObjectType.simple:
-        _registerTyped(
-          t,
-          object: object,
-          override: override,
-          name: name,
-          profiles: profiles,
-          autoStart: autoStart,
-        );
+        fn = _registerTyped;
+        obj = object;
         break;
       case ObjectType.factory:
-        _registerTypedFactory(
-          t,
-          factory!,
-          override: override,
-          name: name,
-          profiles: profiles,
-          autoStart: autoStart,
-        );
+        fn = _registerTypedFactory;
+        obj = factory;
         break;
       case ObjectType.builder:
-        _registerTypedLazy(
-          t,
-          builder!,
-          override: override,
-          name: name,
-          profiles: profiles,
-          autoStart: autoStart,
-        );
+        fn = _registerTypedLazy;
+        obj = builder;
         break;
     }
+    fn(
+      t,
+      obj,
+      override: override,
+      name: name,
+      profiles: profiles,
+      autoStart: autoStart,
+    );
     return this;
   }
 
@@ -378,8 +382,8 @@ class Container {
   }
 
   void _registerTyped(
-    Type t, {
-    dynamic object,
+    Type t,
+    dynamic object, {
     bool override = false,
     bool autoStart = false,
     String name = "",
