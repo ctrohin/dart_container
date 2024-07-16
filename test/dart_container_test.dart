@@ -1,19 +1,23 @@
 import 'package:dart_container/dart_container.dart';
 import 'package:test/test.dart';
 
+import 'auto_start_mock.dart';
+
 void main() {
   group('Simple injection tests', () {
     setUp(() {
-      // Additional setup goes here.
+      Container().clear();
+      print("Setup called");
     });
 
     tearDown(() {
+      print("Tear down");
       Container().clear();
     });
-
     test('Test register not named', () {
-      injectorRegister<String>(object: "Test");
-      expect(injectorGet<String>(), "Test");
+      Container().generic<String>(object: "Test", name: "test");
+      //injectorRegister<String>(object: "Test");
+      expect(injectorGet<String>(name: "test"), "Test");
     });
 
     test('Test register not named override', () {
@@ -54,7 +58,13 @@ void main() {
   });
 
   group('Lazy injection tests', () {
+    setUp(() {
+      Container().clear();
+      print("Setup called");
+    });
+
     tearDown(() {
+      print("Tear down");
       Container().clear();
     });
 
@@ -74,7 +84,13 @@ void main() {
   });
 
   group("Value injection tests", () {
+    setUp(() {
+      Container().clear();
+      print("Setup called");
+    });
+
     tearDown(() {
+      print("Tear down");
       Container().clear();
     });
 
@@ -100,10 +116,18 @@ void main() {
     test('Test inject null on value injection with no value set', () {
       expect(injectorGetValueIfPresent<String>("test"), null);
     });
+
+    tearDown(Container().clear);
   });
 
   group("Profile tests", () {
+    setUp(() {
+      Container().clear();
+      print("Setup called");
+    });
+
     tearDown(() {
+      print("Tear down");
       Container().clear();
     });
 
@@ -148,6 +172,43 @@ void main() {
       } catch (e) {
         expect(e is ContainerException, true);
       }
+    });
+  });
+
+  group("Autostart tests", () {
+    setUp(() {
+      Container().clear();
+      print("Setup called");
+    });
+
+    tearDown(() {
+      print("Tear down");
+      Container().clear();
+    });
+
+    test("Test init", () {
+      Container()
+          .generic(
+            builder: () => AutoStartMock(),
+            autoStart: true,
+            profiles: ["test"],
+          )
+          .profile("test")
+          .autoStart();
+      AutoStartMock mock = injectorGet();
+      expect(mock.initCalled, true);
+    });
+    test("Test run", () {
+      Container()
+          .generic(
+            builder: () => AutoStartMock(),
+            autoStart: true,
+            profiles: ["test"],
+          )
+          .profile("test")
+          .autoStart();
+      AutoStartMock mock = injectorGet();
+      expect(mock.runCalled, true);
     });
   });
 }
