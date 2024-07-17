@@ -6,16 +6,16 @@ import 'auto_start_mock.dart';
 void main() {
   group('Simple injection tests', () {
     setUp(() {
-      Container().clear();
+      $().clear();
       print("Setup called");
     });
 
     tearDown(() {
       print("Tear down");
-      Container().clear();
+      $().clear();
     });
     test('Test register not named', () {
-      Container().generic<String>(object: "Test");
+      $().generic<String>(object: "Test");
       expect(injectorGet<String>(), "Test");
     });
 

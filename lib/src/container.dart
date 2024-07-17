@@ -400,3 +400,5 @@ class Container {
     }
   }
 }
+
+typedef $ = Container;
