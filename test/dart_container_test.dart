@@ -16,39 +16,39 @@ void main() {
     });
     test('Test register not named', () {
       $().generic<String>(object: "Test");
-      expect(injectorGet<String>(), "Test");
+      expect($$<String>(), "Test");
     });
 
     test('Test register not named override', () {
-      injectorRegister<String>(object: "Test");
-      expect(injectorGet<String>(), "Test");
-      injectorRegister<String>(object: "Test2", override: true);
-      expect(injectorGet<String>(), "Test2");
+      $().generic<String>(object: "Test");
+      expect($$<String>(), "Test");
+      $().generic<String>(object: "Test2", override: true);
+      expect($$<String>(), "Test2");
     });
 
     test('Test register named', () {
-      injectorRegister<String>(object: "Test second", name: "second");
-      expect(injectorGet<String>(name: "second"), "Test second");
+      $().generic<String>(object: "Test second", name: "second");
+      expect($$<String>(name: "second"), "Test second");
     });
 
     test('Test register named override', () {
-      injectorRegister<String>(object: "Test second", name: "second");
-      expect(injectorGet<String>(name: "second"), "Test second");
-      injectorRegister<String>(
+      $().generic<String>(object: "Test second", name: "second");
+      expect($$<String>(name: "second"), "Test second");
+      $().generic<String>(
           object: "Test second 2", name: "second", override: true);
-      expect(injectorGet<String>(name: "second"), "Test second 2");
+      expect($$<String>(name: "second"), "Test second 2");
     });
 
     test('Test register if present', () {
-      expect(injectorGetIfPresent<String>(), null);
-      injectorRegister<String>(object: "Test");
-      expect(injectorGet<String>(), "Test");
-      expect(injectorGetIfPresent<String>(), "Test");
+      expect($$$<String>(), null);
+      $().generic<String>(object: "Test");
+      expect($$<String>(), "Test");
+      expect($$$<String>(), "Test");
     });
 
     test('Throw exception on register get with no object registered', () {
       try {
-        injectorGet<String>();
+        $$<String>();
         assert(false, true);
       } catch (e) {
         assert(e is ContainerException, true);
@@ -58,54 +58,54 @@ void main() {
 
   group('Lazy injection tests', () {
     setUp(() {
-      Container().clear();
+      $().clear();
       print("Setup called");
     });
 
     tearDown(() {
       print("Tear down");
-      Container().clear();
+      $().clear();
     });
 
     test('Test register lazy', () {
-      injectorRegister<String>(builder: () => "Test");
-      expect(injectorGet<String>(), "Test");
-      expect(injectorGetIfPresent<String>(), "Test");
+      $().generic<String>(builder: () => "Test");
+      expect($$<String>(), "Test");
+      expect($$$<String>(), "Test");
     });
 
     test('Test register factory', () {
-      injectorRegister<String>(
+      $().generic<String>(
           factory: () => DateTime.now().microsecondsSinceEpoch.toString());
-      String obj1 = injectorGet();
-      String obj2 = injectorGet();
+      String obj1 = $$();
+      String obj2 = $$();
       expect(obj1 == obj2, false);
     });
   });
 
   group("Value injection tests", () {
     setUp(() {
-      Container().clear();
+      $().clear();
       print("Setup called");
     });
 
     tearDown(() {
       print("Tear down");
-      Container().clear();
+      $().clear();
     });
 
     test('Test provide value', () {
-      injectorProvideValue("test", "Test");
-      expect(injectorGetValue("test"), "Test");
+      $().value("test", "Test");
+      expect($$v("test"), "Test");
     });
 
     test('Test provide value if present', () {
-      injectorProvideValue("test", "Test");
-      expect(injectorGetValueIfPresent<String>("test"), "Test");
+      $().value("test", "Test");
+      expect($$$v<String>("test"), "Test");
     });
 
     test('Throw exception on get value with no value set', () {
       try {
-        injectorGetValue<String>("test");
+        $$v<String>("test");
         expect(false, true);
       } catch (e) {
         expect(e is ContainerException, true);
@@ -113,25 +113,25 @@ void main() {
     });
 
     test('Test inject null on value injection with no value set', () {
-      expect(injectorGetValueIfPresent<String>("test"), null);
+      expect($$$v<String>("test"), null);
     });
 
-    tearDown(Container().clear);
+    tearDown($().clear);
   });
 
   group("Profile tests", () {
     setUp(() {
-      Container().clear();
+      $().clear();
       print("Setup called");
     });
 
     tearDown(() {
       print("Tear down");
-      Container().clear();
+      $().clear();
     });
 
     test('Test register with profile inject for profile', () {
-      Container().generic(
+      $().generic(
         object: "Test",
         profiles: ["Test"],
       ).generic(
@@ -139,19 +139,19 @@ void main() {
         name: "testName",
         profiles: ["Test1"],
       ).profile("Test");
-      expect(injectorGet<String>(), "Test");
-      expect(injectorGetIfPresent<String>(name: "testName"), null);
+      expect($$<String>(), "Test");
+      expect($$$<String>(name: "testName"), null);
     });
 
     test(
         'Test register with profile inject for profile throws exception when different profile',
         () {
-      Container().generic(
+      $().generic(
         object: "Test",
         profiles: ["Test"],
       ).profile("Test1");
       try {
-        injectorGet<String>();
+        $$<String>();
         expect(true, false);
       } catch (e) {
         expect(e is ContainerException, true);
@@ -159,14 +159,14 @@ void main() {
     });
 
     test('Set the profile', () {
-      injectorSetProfile("test");
-      expect(injectorGetProfile(), "test");
+      $().profile("test");
+      expect($().getProfile(), "test");
     });
 
     test('Throw exception when trying to set the profile twice', () {
       try {
-        injectorSetProfile("test");
-        injectorSetProfile("test1");
+        $().profile("test");
+        $().profile("test1");
         expect(false, true);
       } catch (e) {
         expect(e is ContainerException, true);
@@ -176,17 +176,17 @@ void main() {
 
   group("Autostart tests", () {
     setUp(() {
-      Container().clear();
+      $().clear();
       print("Setup called");
     });
 
     tearDown(() {
       print("Tear down");
-      Container().clear();
+      $().clear();
     });
 
     test("Test init", () {
-      Container()
+      $()
           .generic(
             builder: () => AutoStartMock(),
             autoStart: true,
@@ -194,11 +194,11 @@ void main() {
           )
           .profile("test")
           .autoStart();
-      AutoStartMock mock = injectorGet();
+      AutoStartMock mock = $$();
       expect(mock.initCalled, true);
     });
     test("Test run", () {
-      Container()
+      $()
           .generic(
             builder: () => AutoStartMock(),
             autoStart: true,
@@ -206,7 +206,7 @@ void main() {
           )
           .profile("test")
           .autoStart();
-      AutoStartMock mock = injectorGet();
+      AutoStartMock mock = $$();
       expect(mock.runCalled, true);
     });
   });
