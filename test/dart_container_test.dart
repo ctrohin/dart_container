@@ -15,9 +15,9 @@ void main() {
       Container().clear();
     });
     test('Test register not named', () {
-      Container().generic<String>(object: "Test", name: "test");
+      Container().generic<String>(object: "Test");
       //injectorRegister<String>(object: "Test");
-      expect(injectorGet<String>(name: "test"), "Test");
+      expect(injectorGet<String>(), "Test");
     });
 
     test('Test register not named override', () {
