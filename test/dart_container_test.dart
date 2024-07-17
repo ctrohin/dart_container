@@ -16,7 +16,6 @@ void main() {
     });
     test('Test register not named', () {
       Container().generic<String>(object: "Test");
-      //injectorRegister<String>(object: "Test");
       expect(injectorGet<String>(), "Test");
     });
 
