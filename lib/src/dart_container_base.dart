@@ -5,3 +5,5 @@ final $$ = Container().get;
 final $$$ = Container().getIfPresent;
 final $$v = Container().getValue;
 final $$$v = Container().getValueIfPresent;
+final $$$then = Container().ifPresentThen;
+final $$$vthen = Container().ifValuePresentThen;

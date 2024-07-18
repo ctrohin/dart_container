@@ -164,6 +164,13 @@ class Container {
     return null;
   }
 
+  void ifPresentThen<T>(Function(T) callback, {String name = ""}) {
+    T? foundObj = getIfPresent(name: name);
+    if (foundObj != null) {
+      callback(foundObj);
+    }
+  }
+
   Container values(Map<String, dynamic> values,
       {List<String> profiles = defaultProfiles}) {
     values.forEach((key, value) {
@@ -188,6 +195,13 @@ class Container {
       return _values[vKey] as T;
     }
     return defaultValue;
+  }
+
+  void ifValuePresentThen<T>(String key, Function(T) callback) {
+    T? value = getValueIfPresent(key);
+    if (value != null) {
+      callback(value);
+    }
   }
 
   T getValue<T>(String key) {

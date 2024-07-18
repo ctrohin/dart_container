@@ -210,4 +210,30 @@ void main() {
       expect(mock.runCalled, true);
     });
   });
+
+  group("Test if present then", () {
+    setUp(() {
+      $().clear();
+      print("Setup called");
+    });
+
+    tearDown(() {
+      print("Tear down");
+      $().clear();
+    });
+    test("Test if present then injection", () {
+      $().generic(object: "Test");
+      String foundValue = "";
+      $$$then<String>(
+        (p0) => foundValue = p0,
+      );
+      expect(foundValue, "Test");
+    });
+    test("Test if present then value injection", () {
+      $().value("test", "test");
+      String foundValue = "";
+      $$$vthen<String>("test", (value) => foundValue = value);
+      expect(foundValue, "test");
+    });
+  });
 }

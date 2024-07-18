@@ -66,6 +66,15 @@ SimpleObj injectedObjectIfPresent = $().get();
 // You can also use shortcut methods
 MyClass injectedObject = $$();
 SimpleObj injectedObjectIfPresent = $$();
+
+// Conditional callback, call some code only if an object is present in the container
+Container().ifPresentThen<MyClass>((MyClass obj) {
+    print(obj);
+});
+// Or by using the shortcut method
+$$$then<MyClass>((MyClass obj) {
+    print(obj);
+});
 ```
 
 ### Using profiles
