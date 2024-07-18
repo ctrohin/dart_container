@@ -9,3 +9,7 @@
 ## 1.0.2
 
 - Added ifAllPresentThen callbacks
+
+## 1.0.3
+
+- Fixed unnecesary imports
