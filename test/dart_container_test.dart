@@ -1,5 +1,4 @@
 import 'package:dart_container/dart_container.dart';
-import 'package:dart_container/src/lookup.dart';
 import 'package:test/test.dart';
 
 import 'auto_start_mock.dart';
