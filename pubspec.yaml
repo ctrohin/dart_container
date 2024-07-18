@@ -1,8 +1,7 @@
 name: dart_container
-description: A starting point for Dart libraries or applications.
+description: Injection container and app server for Dart.
 version: 1.0.0
-# repository: https://github.com/my_org/my_repo
-publish_to: none
+repository: https://github.com/ctrohin/dart_container.git
 
 environment:
   sdk: ^3.4.3
@@ -10,8 +9,7 @@ environment:
 # Add regular dependencies here.
 dependencies:
   # path: ^1.8.0
-  dart_router_extended:
-    git: https://github.com/ctrohin/dart_router_extended.git
+  dart_router_extended: ^1.0.0
 
 dev_dependencies:
   lints: ^3.0.0

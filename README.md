@@ -1,17 +1,5 @@
-<!-- 
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
-
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages). 
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages). 
--->
-
-This package provides a dependency injection solution for the Dart language.
+# Description
+This package provides a dependency injection solution for the Dart language, as well as a application server based on [dart_router_extended].
 
 ## Features
 
@@ -21,6 +9,10 @@ This package provides a dependency injection solution for the Dart language.
 - Qualified name injection: the container supports qualified injection so you can provide a name for your dependency
 - Injection profiles: you can register a certain object for a number of profiles, then inject or don't inject the value according to the selected profile. This feature is helpful if you want to run your application with different injection profiles
 - Value injection: inject simple named values into the container
+- Web server configuration
+- Web routes and controllers support
+- Web routes security using route guard
+- CORS configuration support
 
 ## Usage
 
@@ -30,26 +22,26 @@ This package provides a dependency injection solution for the Dart language.
 var myObject = MyClass();
 var myProperty = "Prop value";
 // Register with the container
-ContainerBuilder()
-    .register(object: myObject)
-    .provideValue("myProperty", myProperty);
+$().generic(object: myObject)
+   .value("myProperty", myProperty);
 
 // Retrieve object
-MyClass injectedObject = Container().get();
-// Retrieve object if present
-MyClass? injectedObjectIfPresent = Container().getIfPresent();
+MyClass injectedObject = $().get();
 
-// You can also use helper methods
-MyClass injectedObject = injectorGet();
-MyClass? injectedObjectIfPresent = injectorGetIfPresent();
+// Retrieve object if present
+MyClass? injectedObjectIfPresent = $().getIfPresent();
+
+// You can also use shortcut methods
+MyClass injectedObject = $$();
+MyClass? injectedObjectIfPresent = $$$();
 
 // Retreieve values
-String property = Container().getValue("myProperty");
-String? propertyIfPresent = Container().getValueIfPresent("myProperty");
+String property = $().getValue("myProperty");
+String? propertyIfPresent = $().getValueIfPresent("myProperty");
 
-//or use the helper methods
-String property = injectorGetValue("myProperty");
-String? propertyIfPresent = injectorGetValueIfPresent("myProperty");
+//or use the shortcut methods
+String property = $$v("myProperty");
+String? propertyIfPresent = $$$v("myProperty");
 
 ```
 
@@ -61,19 +53,19 @@ class SimpleObj {
     SimpleObj(this.timestamp);
 }
 // Register with the container
-ContainerBuilder()
+$()
     //Inject the builder function that will only be called once to create the container object
-    .register(builder: () => MyClass())
-    .register(factory: () => SimpleObj(DateTime.now().microsecondsSinceEpoch.toString()));
+    .generic(builder: () => MyClass())
+    .generic(factory: () => SimpleObj(DateTime.now().microsecondsSinceEpoch.toString()));
 
 // Retrieve object
-MyClass injectedObject = Container().get();
+MyClass injectedObject = $().get();
 // Produce object using the injected factory
-SimpleObj injectedObjectIfPresent = Container().get();
+SimpleObj injectedObjectIfPresent = $().get();
 
-// You can also use helper methods
-MyClass injectedObject = injectorGet();
-SimpleObj injectedObjectIfPresent = injectorGet();
+// You can also use shortcut methods
+MyClass injectedObject = $$();
+SimpleObj injectedObjectIfPresent = $$();
 ```
 
 ### Using profiles
@@ -82,23 +74,23 @@ var myObject = MyClass();
 var myProperty = "Prop value";
 
 // Register with the container
-ContainerBuilder()
-    .register(object: myObject, profiles: ["test", "run"])
-    .provideValue("myProperty", myProperty, profiles: ["test", "run"])
+$()
+    .generic(object: myObject, profiles: ["test", "run"])
+    .value("myProperty", myProperty, profiles: ["test", "run"])
     // Setting the active profile
-    .setProfile("run");
+    .profile("run");
 
 // Retrieve object. The injection always uses the active profile when injecting any registered objects or provided values
 // If the object is not present in the container for the active profile, this method will throw an exception
-MyClass injectedObject = Container().get();
+MyClass injectedObject = $().get();
 // Retrieve object if present. 
 // If the object is not present in the container for the active profile, this method will return null
-MyClass? injectedObjectIfPresent = Container().getIfPresent();
+MyClass? injectedObjectIfPresent = $().getIfPresent();
 
 // Retreieve values. If the value does not exist on the active profile, this method will throw an exception
-String property = Container().getValue("myProperty");
+String property = $().getValue("myProperty");
 // If the value does not exist on the active profile, this method will return null
-String? propertyIfPresent = Container().getValueIfPresent("myProperty");
+String? propertyIfPresent = $().getValueIfPresent("myProperty");
 ```
 
 ### Injecting objects for interfaces
@@ -119,12 +111,12 @@ var myObject = MyClass();
 var myProperty = "Prop value";
 
 // Register with the container for the interface instead of the type
-ContainerBuilder()
-    .registerTyped(MyInterface, object: myObject);
+$()
+    .typed(MyInterface, object: myObject);
 
 // If the object is not present in the container for the active profile, this method will throw an exception
-MyClass injectedObject = Container().get();
+MyClass injectedObject = $().get();
 // Retrieve object if present. 
 // If the object is not present in the container for the active profile, this method will return null
-MyClass? injectedObjectIfPresent = Container().getIfPresent();
+MyClass? injectedObjectIfPresent = $().getIfPresent();
 ```
