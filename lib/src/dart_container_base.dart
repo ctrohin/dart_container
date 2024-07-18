@@ -6,4 +6,5 @@ final $$$ = Container().getIfPresent;
 final $$v = Container().getValue;
 final $$$v = Container().getValueIfPresent;
 final $$$then = Container().ifPresentThen;
-final $$$vthen = Container().ifValuePresentThen;
+final $$$vThen = Container().ifValuePresentThen;
+final $$$allThen = Container().ifAllPresentThen;

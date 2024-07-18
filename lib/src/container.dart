@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dart_container/dart_container.dart';
 import 'package:dart_container/src/container_key.dart';
 import 'package:dart_container/src/container_object.dart';
+import 'package:dart_container/src/lookup.dart';
 import 'package:dart_container/src/object_type.dart';
 import 'package:dart_container/src/value_key.dart';
 
@@ -327,6 +328,20 @@ class Container {
     return this;
   }
 
+  void ifAllPresentThen(List<Lookup> lookups, Function(List) callback) {
+    List list = List.empty(growable: true);
+    for (Lookup lookup in lookups) {
+      dynamic obj = lookup.lookupType == LookupType.object
+          ? _getTypedIfPresent(lookup.type, name: lookup.name)
+          : getValueIfPresent(lookup.name);
+      if (obj == null) {
+        return;
+      }
+      list.add(obj);
+    }
+    callback(list);
+  }
+
 //================== PRIVATE METHODS =================
 
   T _findAndBuild<T>({String name = ""}) {
@@ -412,5 +427,16 @@ class Container {
       _registered[ContainerKey(t, name)] = ContainerObject(
           object as Object, ObjectType.simple, profiles, autoStart);
     }
+  }
+
+  dynamic _getTypedIfPresent(Type t, {String name = ""}) {
+    if (_registered.containsKey(ContainerKey(t, name))) {
+      try {
+        return _findAndBuildImpl(t, name: name);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
   }
 }

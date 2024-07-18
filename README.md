@@ -66,6 +66,29 @@ SimpleObj injectedObjectIfPresent = $().get();
 // You can also use shortcut methods
 MyClass injectedObject = $$();
 SimpleObj injectedObjectIfPresent = $$();
+```
+
+### Conditional callbacks
+
+```dart
+class SimpleObj {
+    final String timestamp;
+    SimpleObj(this.timestamp);
+}
+// Register with the container
+$()
+    //Inject the builder function that will only be called once to create the container object
+    .generic(builder: () => MyClass())
+    .generic(factory: () => SimpleObj(DateTime.now().microsecondsSinceEpoch.toString()));
+
+// Retrieve object
+MyClass injectedObject = $().get();
+// Produce object using the injected factory
+SimpleObj injectedObjectIfPresent = $().get();
+
+// You can also use shortcut methods
+MyClass injectedObject = $$();
+SimpleObj injectedObjectIfPresent = $$();
 
 // Conditional callback, call some code only if an object is present in the container
 Container().ifPresentThen<MyClass>((MyClass obj) {
@@ -74,6 +97,39 @@ Container().ifPresentThen<MyClass>((MyClass obj) {
 // Or by using the shortcut method
 $$$then<MyClass>((MyClass obj) {
     print(obj);
+});
+
+// Conditional callback. Call some code only if a value is present in the container
+$().ifValuePresentThen("valueKey", (value) {
+    print(value);
+});
+// Or by using the shortcut method
+$$$vThen("valueKey", (value) {
+    print(value);
+});
+
+// Conditional callback with multiple dependencies. The container will invoke the callback
+// only if all dependencies are found.
+$().ifAllPresentThen([
+    Lookup.object(MyClass), 
+    Lookup.object(SimpleObject), 
+    Lookup.value("valueKey")
+    ], (list) {
+        MyClass? myClass;
+        SimpleObject? simpleObject;
+        String? value;
+        [myClass, simpleObject, value] = list;
+});
+// Or by calling the shortcut method
+$$$allThen([
+    Lookup.object(MyClass), 
+    Lookup.object(SimpleObject), 
+    Lookup.value("valueKey")
+    ], (list) {
+        MyClass? myClass;
+        SimpleObject? simpleObject;
+        String? value;
+        [myClass, simpleObject, value] = list;
 });
 ```
 
@@ -117,11 +173,9 @@ class MyClass implements MyInterface {
 }
 
 var myObject = MyClass();
-var myProperty = "Prop value";
 
 // Register with the container for the interface instead of the type
-$()
-    .typed(MyInterface, object: myObject);
+$().typed(MyInterface, object: myObject);
 
 // If the object is not present in the container for the active profile, this method will throw an exception
 MyClass injectedObject = $().get();

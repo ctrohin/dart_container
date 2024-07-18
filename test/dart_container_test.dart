@@ -1,4 +1,5 @@
 import 'package:dart_container/dart_container.dart';
+import 'package:dart_container/src/lookup.dart';
 import 'package:test/test.dart';
 
 import 'auto_start_mock.dart';
@@ -232,8 +233,28 @@ void main() {
     test("Test if present then value injection", () {
       $().value("test", "test");
       String foundValue = "";
-      $$$vthen<String>("test", (value) => foundValue = value);
+      $$$vThen<String>("test", (value) => foundValue = value);
       expect(foundValue, "test");
+    });
+
+    test("Test if all present then injection", () {
+      $()
+          .generic(object: "test")
+          .generic<int>(object: 10)
+          .value("testVal", "val");
+      String existingStr = "";
+      int existingNr = 0;
+      String existingVal = "";
+      $().ifAllPresentThen([
+        Lookup.object(String),
+        Lookup.object(int),
+        Lookup.value("testVal"),
+      ], (list) {
+        [existingStr, existingNr, existingVal] = list;
+      });
+      expect(existingStr, "test");
+      expect(existingNr, 10);
+      expect(existingVal, "val");
     });
   });
 }

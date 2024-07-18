@@ -5,3 +5,7 @@
 ## 1.0.1
 
 - Added ifPresentThen and ifValuePresentThen callbacks
+
+## 1.0.2
+
+- Added ifAllPresentThen callbacks
