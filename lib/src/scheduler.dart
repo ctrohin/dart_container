@@ -24,9 +24,12 @@ class Scheduler implements AutoStart {
     List<ScheduledJob> exactTimeJobs = [];
     for (ScheduledJob job in jobs) {
       if (job.getType() == ScheduledJobType.oneTime) {
-        Future.delayed(job.getDuration(), () => job.run());
+        Future.delayed(job.getDuration() ?? Duration.zero, () => job.run());
       } else if (job.getType() == ScheduledJobType.periodic) {
-        _timers.add(Timer.periodic(job.getDuration(), (t) => job.run()));
+        if (job.getDuration() == null) {
+          throw ContainerException("Periodic jobs must implement getDuration");
+        }
+        _timers.add(Timer.periodic(job.getDuration()!, (t) => job.run()));
       } else {
         if (job.getStartTime() == null) {
           throw ContainerException(
@@ -57,7 +60,7 @@ class Scheduler implements AutoStart {
           // If we've reached the trigger time, or just after it, run the job
           removedJobs.add(job);
           print("Starting exact time periodic job");
-          _timers.add(Timer.periodic(job.getDuration(), (t) => job.run()));
+          _timers.add(Timer.periodic(job.getDuration()!, (t) => job.run()));
         }
       }
       for (ScheduledJob removedJob in removedJobs) {
