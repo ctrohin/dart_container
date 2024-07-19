@@ -13,3 +13,7 @@
 ## 1.0.3
 
 - Fixed unnecesary imports
+
+## 1.0.4
+
+- Added scheduled jobs support

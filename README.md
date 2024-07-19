@@ -183,3 +183,123 @@ MyClass injectedObject = $().get();
 // If the object is not present in the container for the active profile, this method will return null
 MyClass? injectedObjectIfPresent = $().getIfPresent();
 ```
+
+### Scheduled jobs
+
+#### Configuring the scheduler
+```dart
+// Sets the timer polling interval to the specified duration
+// The polling interval is useful if you have scheduled tasks running at long periods
+// of time. Longer periods will lessen the CPU load but will also reduce trigger time accuracy
+// The default value, if not specified, is 10 seconds
+$().schedulerPollingInterval(Duration(seconds: 1));
+
+// Will delay all tasks from starting by the specified duration
+$().schedulerInitialDelay(Duration(seconds: 10));
+
+```
+
+#### One time scheduled job
+```dart
+lass OneTimeScheduledJob extends ScheduledJob {
+  bool hasRun = false;
+  @override
+  Duration? getDuration() => Duration(seconds: 1);
+
+  @override
+  ScheduledJobType getType() => ScheduledJobType.oneTime;
+
+  @override
+  void run() {
+    hasRun = true;
+  }
+
+  @override
+  DateTime? getStartTime() => null;
+}
+
+// Will run scheduled task after 1 second, as provided by the getDuration implementation
+$().schedule(oneTime).autoStart();
+
+```
+
+#### Periodic scheduled job
+```dart
+class PeriodicScheduledJob extends ScheduledJob {
+  int runTimes = 0;
+  @override
+  Duration? getDuration() => Duration(seconds: 1);
+
+  @override
+  ScheduledJobType getType() => ScheduledJobType.periodic;
+
+  @override
+  DateTime? getStartTime() => null;
+
+  @override
+  void run() {
+    runTimes++;
+  }
+}
+
+// Will run immediately, then at every 1 second as specified by the getDuration implementation
+PeriodicScheduledJob periodic = PeriodicScheduledJob();
+$().schedule(periodic).autoStart();
+
+```
+
+#### At exact time scheduled job
+```dart
+class AtExactTimeScheduledJob extends ScheduledJob {
+  bool ran = false;
+  @override
+  Duration? getDuration() => null;
+
+  @override
+  DateTime? getStartTime() => DateTime.now().add(Duration(seconds: 3));
+
+  @override
+  ScheduledJobType getType() => ScheduledJobType.atExactTime;
+
+  @override
+  void run() {
+    ran = true;
+  }
+}
+
+AtExactTimeScheduledJob atTime = AtExactTimeScheduledJob();
+
+// Will run after 3 seconds
+$().schedulerPollingInterval(Duration(seconds: 1))
+  .schedule(atTime)
+  .autoStart();
+
+```
+
+#### At exact time repeating scheduled job
+```dart
+class AtExactTimeRepeatingScheduledJob extends ScheduledJob {
+  bool ran = false;
+  @override
+  Duration? getDuration() => Duration(seconds: 2);
+
+  @override
+  DateTime? getStartTime() => DateTime.now().add(Duration(seconds: 3));
+
+  @override
+  ScheduledJobType getType() => ScheduledJobType.atExactTime;
+
+  @override
+  void run() {
+    ran = true;
+  }
+}
+
+AtExactTimeScheduledJob atTime = AtExactTimeScheduledJob();
+
+// Will run after 3 seconds, then run every other 2 seconds
+$().schedulerPollingInterval(Duration(seconds: 1))
+  .schedule(atTime)
+  .autoStart();
+
+```
