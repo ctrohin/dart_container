@@ -13,5 +13,8 @@ export 'src/web_server.dart';
 export 'src/web_server_config.dart';
 export 'src/cors_configuration.dart';
 export 'src/lookup.dart';
+export 'src/scheduled_job.dart';
+export 'src/scheduled_job_type.dart';
+export 'src/scheduler.dart';
 
 export 'package:dart_router_extended/dart_router_extended.dart';

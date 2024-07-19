@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:dart_container/dart_container.dart';
 import 'package:dart_container/src/container_key.dart';
 import 'package:dart_container/src/container_object.dart';
-import 'package:dart_container/src/lookup.dart';
 import 'package:dart_container/src/object_type.dart';
+import 'package:dart_container/src/scheduler_configuration.dart';
 import 'package:dart_container/src/value_key.dart';
 
 class Container {
@@ -16,6 +16,7 @@ class Container {
   String _profile = defaultProfile;
   ContainerConfiguration? _containerConfiguration;
   WebServerConfig? _webServerConfig;
+  SchedulerConfiguration? _schedulerConfig;
 
   static final Container _instance = Container._construct();
 
@@ -218,6 +219,11 @@ class Container {
     _registered.clear();
     _values.clear();
     _profile = defaultProfile;
+    Scheduler? sch = getIfPresent<Scheduler>();
+    if (sch != null) {
+      sch.stopSchedulers();
+    }
+    _schedulerConfig = null;
     return this;
   }
 
@@ -340,6 +346,40 @@ class Container {
       list.add(obj);
     }
     callback(list);
+  }
+
+  Container schedule(ScheduledJob job,
+      {List<String> profiles = Container.defaultProfiles}) {
+    if (_schedulerConfig == null) {
+      _schedulerConfig = SchedulerConfiguration();
+      typed(Scheduler,
+          builder: () => Scheduler(_schedulerConfig!), autoStart: true);
+      print("Added scheduler");
+    }
+    _schedulerConfig!.addJob(job, profiles);
+    return this;
+  }
+
+  Container schedulerInitialDelay(Duration duration) {
+    if (_schedulerConfig == null) {
+      _schedulerConfig = SchedulerConfiguration();
+      typed(Scheduler,
+          builder: () => Scheduler(_schedulerConfig!), autoStart: true);
+      print("Added scheduler");
+    }
+    _schedulerConfig!.initialDelay = duration;
+    return this;
+  }
+
+  Container schedulerPollingInterval(Duration duration) {
+    if (_schedulerConfig == null) {
+      _schedulerConfig = SchedulerConfiguration();
+      typed(Scheduler,
+          builder: () => Scheduler(_schedulerConfig!), autoStart: true);
+      print("Added scheduler");
+    }
+    _schedulerConfig!.pollingInterval = duration;
+    return this;
   }
 
 //================== PRIVATE METHODS =================

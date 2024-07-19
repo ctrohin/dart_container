@@ -8,3 +8,4 @@ final $$$v = Container().getValueIfPresent;
 final $$$then = Container().ifPresentThen;
 final $$$vThen = Container().ifValuePresentThen;
 final $$$allThen = Container().ifAllPresentThen;
+final $$profile = Container().getProfile;
