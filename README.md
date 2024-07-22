@@ -13,6 +13,7 @@ This package provides a dependency injection solution for the Dart language, as 
 - Web routes and controllers support
 - Web routes security using route guard
 - CORS configuration support
+- Scheduled tasks support
 
 ## Usage
 
@@ -32,16 +33,16 @@ MyClass injectedObject = $().get();
 MyClass? injectedObjectIfPresent = $().getIfPresent();
 
 // You can also use shortcut methods
-MyClass injectedObject = $$();
-MyClass? injectedObjectIfPresent = $$$();
+MyClass injectedObject = $get();
+MyClass? injectedObjectIfPresent = $$get();
 
 // Retreieve values
 String property = $().getValue("myProperty");
 String? propertyIfPresent = $().getValueIfPresent("myProperty");
 
 //or use the shortcut methods
-String property = $$v("myProperty");
-String? propertyIfPresent = $$$v("myProperty");
+String property = $val("myProperty");
+String? propertyIfPresent = $$val("myProperty");
 
 ```
 
@@ -61,11 +62,11 @@ $()
 // Retrieve object
 MyClass injectedObject = $().get();
 // Produce object using the injected factory
-SimpleObj injectedObjectIfPresent = $().get();
+SimpleObj injectedObjectIfPresent = $().getIfPresent();
 
 // You can also use shortcut methods
-MyClass injectedObject = $$();
-SimpleObj injectedObjectIfPresent = $$();
+MyClass injectedObject = $get();
+SimpleObj injectedObjectIfPresent = $$get();
 ```
 
 ### Conditional callbacks
@@ -87,15 +88,15 @@ MyClass injectedObject = $().get();
 SimpleObj injectedObjectIfPresent = $().get();
 
 // You can also use shortcut methods
-MyClass injectedObject = $$();
-SimpleObj injectedObjectIfPresent = $$();
+MyClass injectedObject = $get();
+SimpleObj injectedObjectIfPresent = $$get();
 
 // Conditional callback, call some code only if an object is present in the container
 Container().ifPresentThen<MyClass>((MyClass obj) {
     print(obj);
 });
 // Or by using the shortcut method
-$$$then<MyClass>((MyClass obj) {
+$then<MyClass>((MyClass obj) {
     print(obj);
 });
 
@@ -104,7 +105,7 @@ $().ifValuePresentThen("valueKey", (value) {
     print(value);
 });
 // Or by using the shortcut method
-$$$vThen("valueKey", (value) {
+$valThen("valueKey", (value) {
     print(value);
 });
 
@@ -121,7 +122,7 @@ $().ifAllPresentThen([
         [myClass, simpleObject, value] = list;
 });
 // Or by calling the shortcut method
-$$$allThen([
+$allThen([
     Lookup.object(MyClass), 
     Lookup.object(SimpleObject), 
     Lookup.value("valueKey")
@@ -178,10 +179,10 @@ var myObject = MyClass();
 $().typed(MyInterface, object: myObject);
 
 // If the object is not present in the container for the active profile, this method will throw an exception
-MyClass injectedObject = $().get();
+MyInterface injectedObject = $().get();
 // Retrieve object if present. 
 // If the object is not present in the container for the active profile, this method will return null
-MyClass? injectedObjectIfPresent = $().getIfPresent();
+MyInterface? injectedObjectIfPresent = $().getIfPresent();
 ```
 
 ### Scheduled jobs
@@ -201,7 +202,7 @@ $().schedulerInitialDelay(Duration(seconds: 10));
 
 #### One time scheduled job
 ```dart
-lass OneTimeScheduledJob extends ScheduledJob {
+class OneTimeScheduledJob extends ScheduledJob {
   bool hasRun = false;
   @override
   Duration? getDuration() => Duration(seconds: 1);

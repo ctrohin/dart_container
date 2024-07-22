@@ -17,3 +17,7 @@
 ## 1.0.4
 
 - Added scheduled jobs support
+
+## 1.0.5
+
+- Refactored shortcut methods to be more readable

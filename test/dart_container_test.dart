@@ -16,39 +16,39 @@ void main() {
     });
     test('Test register not named', () {
       $().generic<String>(object: "Test");
-      expect($$<String>(), "Test");
+      expect($get<String>(), "Test");
     });
 
     test('Test register not named override', () {
       $().generic<String>(object: "Test");
-      expect($$<String>(), "Test");
+      expect($get<String>(), "Test");
       $().generic<String>(object: "Test2", override: true);
-      expect($$<String>(), "Test2");
+      expect($get<String>(), "Test2");
     });
 
     test('Test register named', () {
       $().generic<String>(object: "Test second", name: "second");
-      expect($$<String>(name: "second"), "Test second");
+      expect($get<String>(name: "second"), "Test second");
     });
 
     test('Test register named override', () {
       $().generic<String>(object: "Test second", name: "second");
-      expect($$<String>(name: "second"), "Test second");
+      expect($get<String>(name: "second"), "Test second");
       $().generic<String>(
           object: "Test second 2", name: "second", override: true);
-      expect($$<String>(name: "second"), "Test second 2");
+      expect($get<String>(name: "second"), "Test second 2");
     });
 
     test('Test register if present', () {
-      expect($$$<String>(), null);
+      expect($$get<String>(), null);
       $().generic<String>(object: "Test");
-      expect($$<String>(), "Test");
-      expect($$$<String>(), "Test");
+      expect($get<String>(), "Test");
+      expect($$get<String>(), "Test");
     });
 
     test('Throw exception on register get with no object registered', () {
       try {
-        $$<String>();
+        $get<String>();
         assert(false, true);
       } catch (e) {
         assert(e is ContainerException, true);
@@ -69,15 +69,15 @@ void main() {
 
     test('Test register lazy', () {
       $().generic<String>(builder: () => "Test");
-      expect($$<String>(), "Test");
-      expect($$$<String>(), "Test");
+      expect($get<String>(), "Test");
+      expect($$get<String>(), "Test");
     });
 
     test('Test register factory', () {
       $().generic<String>(
           factory: () => DateTime.now().microsecondsSinceEpoch.toString());
-      String obj1 = $$();
-      String obj2 = $$();
+      String obj1 = $get();
+      String obj2 = $get();
       expect(obj1 == obj2, false);
     });
   });
@@ -95,17 +95,17 @@ void main() {
 
     test('Test provide value', () {
       $().value("test", "Test");
-      expect($$v("test"), "Test");
+      expect($val("test"), "Test");
     });
 
     test('Test provide value if present', () {
       $().value("test", "Test");
-      expect($$$v<String>("test"), "Test");
+      expect($$val<String>("test"), "Test");
     });
 
     test('Throw exception on get value with no value set', () {
       try {
-        $$v<String>("test");
+        $val<String>("test");
         expect(false, true);
       } catch (e) {
         expect(e is ContainerException, true);
@@ -113,7 +113,7 @@ void main() {
     });
 
     test('Test inject null on value injection with no value set', () {
-      expect($$$v<String>("test"), null);
+      expect($$val<String>("test"), null);
     });
 
     tearDown($().clear);
@@ -139,8 +139,8 @@ void main() {
         name: "testName",
         profiles: ["Test1"],
       ).profile("Test");
-      expect($$<String>(), "Test");
-      expect($$$<String>(name: "testName"), null);
+      expect($get<String>(), "Test");
+      expect($$get<String>(name: "testName"), null);
     });
 
     test(
@@ -151,7 +151,7 @@ void main() {
         profiles: ["Test"],
       ).profile("Test1");
       try {
-        $$<String>();
+        $get<String>();
         expect(true, false);
       } catch (e) {
         expect(e is ContainerException, true);
@@ -194,7 +194,7 @@ void main() {
           )
           .profile("test")
           .autoStart();
-      AutoStartMock mock = $$();
+      AutoStartMock mock = $get();
       expect(mock.initCalled, true);
     });
     test("Test run", () {
@@ -206,7 +206,7 @@ void main() {
           )
           .profile("test")
           .autoStart();
-      AutoStartMock mock = $$();
+      AutoStartMock mock = $get();
       expect(mock.runCalled, true);
     });
   });
@@ -224,7 +224,7 @@ void main() {
     test("Test if present then injection", () {
       $().generic(object: "Test");
       String foundValue = "";
-      $$$then<String>(
+      $then<String>(
         (p0) => foundValue = p0,
       );
       expect(foundValue, "Test");
@@ -232,7 +232,7 @@ void main() {
     test("Test if present then value injection", () {
       $().value("test", "test");
       String foundValue = "";
-      $$$vThen<String>("test", (value) => foundValue = value);
+      $valThen<String>("test", (value) => foundValue = value);
       expect(foundValue, "test");
     });
 
