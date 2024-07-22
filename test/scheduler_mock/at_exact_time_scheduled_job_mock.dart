@@ -1,6 +1,6 @@
 import 'package:dart_container/dart_container.dart';
 
-class AtExactTimeScheduledJobMock extends ScheduledJob {
+class AtExactTimeScheduledJobMock implements ScheduledJob {
   bool ran = false;
   @override
   Duration? getDuration() => null;

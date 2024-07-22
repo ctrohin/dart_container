@@ -202,7 +202,7 @@ $().schedulerInitialDelay(Duration(seconds: 10));
 
 #### One time scheduled job
 ```dart
-class OneTimeScheduledJob extends ScheduledJob {
+class OneTimeScheduledJob implements ScheduledJob {
   bool hasRun = false;
   @override
   Duration? getDuration() => Duration(seconds: 1);
@@ -226,7 +226,7 @@ $().schedule(oneTime).autoStart();
 
 #### Periodic scheduled job
 ```dart
-class PeriodicScheduledJob extends ScheduledJob {
+class PeriodicScheduledJob implements ScheduledJob {
   int runTimes = 0;
   @override
   Duration? getDuration() => Duration(seconds: 1);
@@ -251,7 +251,7 @@ $().schedule(periodic).autoStart();
 
 #### At exact time scheduled job
 ```dart
-class AtExactTimeScheduledJob extends ScheduledJob {
+class AtExactTimeScheduledJob implements ScheduledJob {
   bool ran = false;
   @override
   Duration? getDuration() => null;

@@ -1,6 +1,6 @@
 import 'package:dart_container/dart_container.dart';
 
-class AtTimePeriodicScheduledJobMock extends ScheduledJob {
+class AtTimePeriodicScheduledJobMock implements ScheduledJob {
   int count = 0;
   @override
   Duration? getDuration() => Duration(seconds: 2);

@@ -21,3 +21,7 @@
 ## 1.0.5
 
 - Refactored shortcut methods to be more readable
+
+## 1.0.6
+
+- Refactored ScheduledJob and AutoStart to interfaces

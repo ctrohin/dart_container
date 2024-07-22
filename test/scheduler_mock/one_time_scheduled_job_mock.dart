@@ -1,6 +1,6 @@
 import 'package:dart_container/dart_container.dart';
 
-class OneTimeScheduledJobMock extends ScheduledJob {
+class OneTimeScheduledJobMock implements ScheduledJob {
   bool hasRun = false;
   @override
   Duration? getDuration() => Duration(seconds: 1);

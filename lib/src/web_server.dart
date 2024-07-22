@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:dart_container/dart_container.dart';
 
-class WebServer extends AutoStart {
+class WebServer implements AutoStart {
   final WebServerConfig config;
   late Router router;
   late HttpServer server;
@@ -80,4 +80,7 @@ class WebServer extends AutoStart {
   void stop({bool force = false}) {
     server.close(force: force);
   }
+
+  @override
+  void init() {}
 }
