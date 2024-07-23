@@ -25,3 +25,8 @@
 ## 1.0.6
 
 - Refactored ScheduledJob and AutoStart to interfaces
+
+## 1.0.7
+
+- Refactored classes into packages
+- More restrictive static anlayzer
