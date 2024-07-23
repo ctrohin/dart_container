@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:dart_container/dart_container.dart';
-import 'package:dart_container/src/scheduler_configuration.dart';
+import 'package:dart_container/src/scheduler/scheduler_configuration.dart';
 
 class Scheduler implements AutoStart {
   late final SchedulerConfiguration _config;

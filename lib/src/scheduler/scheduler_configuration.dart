@@ -1,4 +1,4 @@
-import 'package:dart_container/src/scheduled_job.dart';
+import 'package:dart_container/src/scheduler/scheduled_job.dart';
 
 class SchedulerConfiguration {
   Duration initialDelay = Duration.zero;

@@ -95,7 +95,7 @@ void main() {
 
     test('Test provide value', () {
       $().value("test", "Test");
-      expect($val("test"), "Test");
+      expect($val<String>("test"), "Test");
     });
 
     test('Test provide value if present', () {

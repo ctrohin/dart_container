@@ -21,14 +21,14 @@ void main() {
     test("Test one time scheduler", () async {
       OneTimeScheduledJobMock oneTime = OneTimeScheduledJobMock();
       $().schedule(oneTime).autoStart();
-      await Future.delayed(Duration(seconds: 3));
+      await Future<void>.delayed(Duration(seconds: 3));
       expect(oneTime.hasRun, true);
     });
 
     test("Test periodic scheduler", () async {
       PeriodicScheduledJobMock periodic = PeriodicScheduledJobMock();
       $().schedule(periodic).autoStart();
-      await Future.delayed(Duration(seconds: 3));
+      await Future<void>.delayed(Duration(seconds: 3));
       expect(periodic.runTimes >= 2, true);
     });
 
@@ -38,7 +38,7 @@ void main() {
           .schedulerPollingInterval(Duration(seconds: 1))
           .schedule(atTime)
           .autoStart();
-      await Future.delayed(Duration(seconds: 5));
+      await Future<void>.delayed(Duration(seconds: 5));
       expect(atTime.ran, true);
     });
 
@@ -48,7 +48,7 @@ void main() {
           .schedulerPollingInterval(Duration(seconds: 1))
           .schedule(atTime)
           .autoStart();
-      await Future.delayed(Duration(seconds: 10));
+      await Future<void>.delayed(Duration(seconds: 10));
       expect(atTime.count >= 3, true);
     });
   });

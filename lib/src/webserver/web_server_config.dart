@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:dart_container/src/container_exception.dart';
-import 'package:dart_container/src/cors_configuration.dart';
+import 'package:dart_container/src/container/container_exception.dart';
+import 'package:dart_container/src/webserver/cors_configuration.dart';
 import 'package:dart_router_extended/dart_router_extended.dart';
 
 class WebServerConfig {

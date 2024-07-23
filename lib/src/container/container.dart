@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dart_container/dart_container.dart';
-import 'package:dart_container/src/container_key.dart';
-import 'package:dart_container/src/container_object.dart';
-import 'package:dart_container/src/object_type.dart';
-import 'package:dart_container/src/scheduler_configuration.dart';
-import 'package:dart_container/src/value_key.dart';
+import 'package:dart_container/src/container/container_key.dart';
+import 'package:dart_container/src/container/container_object.dart';
+import 'package:dart_container/src/container/object_type.dart';
+import 'package:dart_container/src/scheduler/scheduler_configuration.dart';
+import 'package:dart_container/src/container/value_key.dart';
 
 class Container {
   final Map<ContainerKey, ContainerObject> _registered = {};
@@ -166,7 +166,7 @@ class Container {
     return null;
   }
 
-  void ifPresentThen<T>(Function(T) callback, {String name = ""}) {
+  void ifPresentThen<T>(void Function(T) callback, {String name = ""}) {
     T? foundObj = getIfPresent(name: name);
     if (foundObj != null) {
       callback(foundObj);
@@ -199,7 +199,7 @@ class Container {
     return defaultValue;
   }
 
-  void ifValuePresentThen<T>(String key, Function(T) callback) {
+  void ifValuePresentThen<T>(String key, void Function(T) callback) {
     T? value = getValueIfPresent(key);
     if (value != null) {
       callback(value);
@@ -248,7 +248,7 @@ class Container {
   }
 
   Container builders(
-    Map<Type, Function()> builders, {
+    Map<Type, dynamic Function()> builders, {
     List<String> profiles = Container.defaultProfiles,
   }) {
     for (var mapEntry in builders.entries) {
@@ -258,7 +258,7 @@ class Container {
   }
 
   Container factories(
-    Map<Type, Function()> factories, {
+    Map<Type, dynamic Function()> factories, {
     List<String> profiles = Container.defaultProfiles,
   }) {
     for (var mapEntry in factories.entries) {
@@ -268,7 +268,7 @@ class Container {
   }
 
   Container startable(
-    Map<Type, Function()> builders, {
+    Map<Type, dynamic Function()> builders, {
     List<String> profiles = Container.defaultProfiles,
   }) {
     for (var mapEntry in builders.entries) {
@@ -334,12 +334,13 @@ class Container {
     return this;
   }
 
-  void ifAllPresentThen(List<Lookup> lookups, Function(List) callback) {
-    List list = List.empty(growable: true);
+  void ifAllPresentThen(
+      List<Lookup> lookups, dynamic Function(List<dynamic>) callback) {
+    List<dynamic> list = List.empty(growable: true);
     for (Lookup lookup in lookups) {
       dynamic obj = lookup.lookupType == LookupType.object
           ? _getTypedIfPresent(lookup.type, name: lookup.name)
-          : getValueIfPresent(lookup.name);
+          : getValueIfPresent(lookup.name) as dynamic;
       if (obj == null) {
         return;
       }
@@ -385,7 +386,7 @@ class Container {
 //================== PRIVATE METHODS =================
 
   T _findAndBuild<T>({String name = ""}) {
-    return _findAndBuildImpl(T, name: name);
+    return _findAndBuildImpl(T, name: name) as T;
   }
 
   dynamic _findAndBuildImpl(Type t, {String name = ""}) {
@@ -396,26 +397,42 @@ class Container {
           "No object present in the container of type $t, name $name and profile $_profile");
     }
 
+    // We have a simple singleton object
     if (existing.objectType == ObjectType.simple) {
+      existing.autoStart = false;
+      if (existing.autoStart && existing.object is AutoStart) {
+        var obj = existing.object as AutoStart;
+        // Cancel the autostart so that the object is started only once
+        existing.autoStart = false;
+        obj.init();
+        (() async => obj.run())();
+      }
       return existing.object;
     }
 
+    // We have a factory
     if (existing.objectType == ObjectType.factory) {
-      return (existing.object as Function)();
+      dynamic obj = (existing.object as Function)();
+      if (existing.autoStart && obj is AutoStart) {
+        obj.init();
+        (() async => obj.run())();
+      }
+      return obj;
     }
 
-    dynamic lazyObject = (existing.object as Function)();
-    if (existing.autoStart && lazyObject is AutoStart) {
-      lazyObject.init();
-      (() async => lazyObject.run())();
+    // We can only have a builder at this point
+    dynamic obj = (existing.object as Function)();
+    if (existing.autoStart && obj is AutoStart) {
+      obj.init();
+      (() async => obj.run())();
     }
     _registered[ContainerKey(t, name)] = ContainerObject(
-      lazyObject as Object,
+      obj as Object,
       ObjectType.simple,
       existing.profiles,
-      existing.autoStart,
+      false,
     );
-    return lazyObject;
+    return obj;
   }
 
   void _registerTypedLazy(

@@ -1,4 +1,4 @@
-import 'package:dart_container/src/scheduled_job_type.dart';
+import 'package:dart_container/src/scheduler/scheduled_job_type.dart';
 
 abstract interface class ScheduledJob {
   void run();
