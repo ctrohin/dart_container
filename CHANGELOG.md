@@ -31,6 +31,6 @@
 - Refactored classes into packages
 - More restrictive static anlayzer
 
-## 1.0.7+1
+## 1.0.7+2
 
 - Updated documentation
