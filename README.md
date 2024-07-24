@@ -22,18 +22,26 @@ This package provides a dependency injection solution for the Dart language, as 
 ```dart
 var myObject = MyClass();
 var myProperty = "Prop value";
-// Register with the container
+// Register an object with the container
 $().generic(object: myObject)
-   .value("myProperty", myProperty);
+   // then register a value
+   .value("myProperty", myProperty)
+   // then register a named object. This also works with builders and factories
+   .generic(object: myObject, name: "alias");
 
 // Retrieve object
 MyClass injectedObject = $().get();
+// Retrieved the qualified object
+MyClass injectedObjectAlias = $().get(name: "alias");
 
 // Retrieve object if present
 MyClass? injectedObjectIfPresent = $().getIfPresent();
+// Retrieve the qualified object 
+MyClass? injectedAliasObjectIfPresent = $().getIfPresent(name: "alias");
 
 // You can also use shortcut methods
 MyClass injectedObject = $get();
+MyClass injectedObjectAlias = $get(name: "alias");
 MyClass? injectedObjectIfPresent = $$get();
 
 // Retreieve values
@@ -46,7 +54,9 @@ String? propertyIfPresent = $$val("myProperty");
 
 ```
 
-### Lazy and factory injection
+### Builder and factory injection
+
+Both the builder and the factories are practically methods that are used to build the container object, with the difference that with a factory, the method is called every time the object is retrieved from the container, while with the builder it is only built once, then the same instance returned, making it basically a lazy buildable singleton.
 
 ```dart
 class SimpleObj {
@@ -185,6 +195,28 @@ MyInterface injectedObject = $().get();
 MyInterface? injectedObjectIfPresent = $().getIfPresent();
 ```
 
+### Autostartable objects
+Sometimes you might need to run some code, or start a webserver (the build in web server is also an AutoStart implementation). This iw why *dart_container* implements autostartable functionality.
+
+```dart
+class AutoStartMock implements AutoStart {
+  @override
+  void init() {
+    print("Init called");
+  }
+
+  @override
+  void run() {
+    print("Run called");
+  }
+}
+
+$().generic(builder: () => AutoStartMock(), autoStart: true)
+  // Once autostart is called, the init method is called first for the AutoStart objects,
+  // then the run method is called asynchronously, to avoid blocking the container and any other functionality
+  .autoStart();
+```
+
 ### Scheduled jobs
 
 #### Configuring the scheduler
@@ -303,4 +335,84 @@ $().schedulerPollingInterval(Duration(seconds: 1))
   .schedule(atTime)
   .autoStart();
 
+```
+
+### Web server
+*dart_container* includes a built in webserver that can be easily configured using Controllers and Routes.
+
+```dart
+class StausController extends Controller {
+  StatusController()
+      : super(
+        // All the routes under a controller are mounted under the controller prefix
+          pathPrefix: "/status",
+          routes: [
+            GetStatusRoute(),
+            PostStatusRoute(),
+          ],
+          // The guard allows secured access to routes. If you don't want anyone accessing a route or
+          // controller, you can implement a guard
+          guard: StatusGuard(),
+        );
+}
+
+class StatusGuard extends RouteGuard {
+  @override
+  bool isSecure(Request request) {
+    return true;
+  }
+}
+
+class GetStatusRoute extends AbstractRoute {
+  GetStatusRoute()
+      : super(
+        // All the route parsing is fully compatible with shelf_router since that is the actual library used
+          ["/<key>"],
+          Method.get,
+          // The route parameter gets passed to the handler
+          (Request req, String key) {
+            return JsonResponse.okJson({key: "requested"});
+          },
+        );
+}
+
+class PostStatusRoute extends AbstractRoute {
+  PostStatusRoute()
+      : super(
+          ["/<key>"],
+          Method.post,
+          (Request req, String key) async {
+            return JsonResponse.ok({key: "posted"});
+          },
+        );
+}
+
+$().webServerConfig(
+  // First of all, we need a not found handler
+    (req) => Response.notFound(
+        "Route not found for ${req.method}:${req.requestedUri}"),
+    // the host
+    'localhost',
+    // and the port
+    env.httpPort,
+    shared: true,
+    profiles: ["test", "run"],
+  )
+  // Provide the list of controllers
+  .controllers([
+    StatusController();
+  ])
+  // and/or provide a list of routes
+  .routes([
+    GetStatusRoute(),
+    PostStatusRoute(),
+  ])
+  // set the active profile
+  .profile("run")
+  // the call autostart to boot up the web server
+  .autoStart();
+
+  // If you do not want to use the autostartables and still want to boot up the web server, you can
+  Future.delayed(Duration.zero, () async => $get<WebServer>().run());
+  .
 ```
