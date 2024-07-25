@@ -18,6 +18,9 @@ class WebServerConfig {
   final CorsConfiguration? corsBuilder;
   late RouteGuard? routeGuard;
   final bool Function(Request)? routeGuardHandler;
+  final FutureOr<Response> Function(Request, Exception)?
+      unknownExceptionHandler;
+
   WebServerConfig(
     this.notFoundHanlder,
     this.address,
@@ -29,6 +32,7 @@ class WebServerConfig {
     this.corsBuilder,
     this.routeGuard,
     this.routeGuardHandler,
+    this.unknownExceptionHandler,
   }) {
     if (corsBuilder != null && staticCorsHeaders != null) {
       throw ContainerException(

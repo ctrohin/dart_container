@@ -22,6 +22,7 @@ class WebServer implements AutoStart {
 
     var handler = const Pipeline()
         .addMiddleware(logRequests())
+        .addMiddleware(_exception)
         .addMiddleware(_cors)
         .addMiddleware(_security)
         .addHandler(router.call);
@@ -72,6 +73,22 @@ class WebServer implements AutoStart {
         return Response.ok('', headers: corsHeaders);
       }
 
+      // Move onto handler
+      return response;
+    };
+  }
+
+  Handler _exception(Handler innerHandler) {
+    if (config.unknownExceptionHandler == null) {
+      return innerHandler;
+    }
+    return (request) async {
+      Response? response;
+      try {
+        response = await innerHandler(request);
+      } catch (e) {
+        return config.unknownExceptionHandler!(request, e as Exception);
+      }
       // Move onto handler
       return response;
     };
