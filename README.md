@@ -416,3 +416,35 @@ $().webServerConfig(
   Future.delayed(Duration.zero, () async => $get<WebServer>().run());
   .
 ```
+
+### Eventing
+With dart-container you get a simple publish/subscribe framework for passing along messages, and building reactive applications. For the time being, the support is limited to exact matching topics.
+
+IMPORTANT: A known limitation at this point is that if a subscriber is registered for two topics "TopicA" and "TopicB", and a publisher publishes on both topics, the subscriber will get the same message twice, one for each topic. This behavior will be changed in a future release.
+
+```dart
+
+// First subscribe to the topic
+$().subscribe("topic", (topic, event) {
+  print("Got message on topic $topic with event value $event");
+});
+
+// Then publish to the topic
+$().publishEvent(["topic"], "newValue");
+
+// You can also subscribe and publish to multiple topics
+
+// Publishing to multiple subscribers
+$().subscribe("topic1", (topic, event) {
+  print("Subscriber 1 : Got message on topic $topic with event value $event");
+});
+
+$().subscribe("topic2", (topic, event) {
+  print("Subscriber 2 : Got message on topic $topic with event value $event");
+});
+
+// Publish a message to multiple topics.
+// In this case, both subscribers will get the new message.
+$().publishEvent(["topic1", "topic2"], "newValue");
+
+```

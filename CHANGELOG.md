@@ -34,3 +34,7 @@
 ## 1.0.7+2
 
 - Updated documentation
+
+## 1.0.8
+
+- Added event publish/subscribe functionality

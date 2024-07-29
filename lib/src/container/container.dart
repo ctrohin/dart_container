@@ -8,6 +8,8 @@ import 'package:dart_container/src/container/object_type.dart';
 import 'package:dart_container/src/scheduler/scheduler_configuration.dart';
 import 'package:dart_container/src/container/value_key.dart';
 
+typedef TopicHandler = FutureOr<void> Function(String, dynamic);
+
 class Container {
   final Map<ContainerKey, ContainerObject> _registered = {};
   final Map<ValueKey, dynamic> _values = {};
@@ -17,6 +19,8 @@ class Container {
   ContainerConfiguration? _containerConfiguration;
   WebServerConfig? _webServerConfig;
   SchedulerConfiguration? _schedulerConfig;
+  final Set<String> _allowedTopics = {};
+  final Map<String, List<TopicHandler>> _topicHandlers = {};
 
   static final Container _instance = Container._construct();
 
@@ -219,6 +223,7 @@ class Container {
     _registered.clear();
     _values.clear();
     _profile = defaultProfile;
+    _allowedTopics.clear();
     Scheduler? sch = getIfPresent<Scheduler>();
     if (sch != null) {
       sch.stopSchedulers();
@@ -383,7 +388,36 @@ class Container {
     return this;
   }
 
+  Container allowedTopics(List<String> topics) {
+    _allowedTopics.addAll(topics);
+    return this;
+  }
+
+  Container subscribe(String topic, TopicHandler handler) {
+    if (_allowedTopics.isNotEmpty && !_allowedTopics.contains(topic)) {
+      throw ContainerException(
+          "Cannot subscribe to topic $topic. The allowed topics are $_allowedTopics");
+    }
+    List<TopicHandler> handlers = _topicHandlers[topic] ?? [];
+    handlers.add(handler);
+    _topicHandlers[topic] = handlers;
+    return this;
+  }
+
+  Future<void> publishEvent<T>(List<String> topics, T event) async {
+    for (String topic in topics) {
+      List<TopicHandler> handlers = _topicHandlers[topic] ?? [];
+      for (TopicHandler handler in handlers) {
+        _sendEvent(handler, topic, event);
+      }
+    }
+  }
+
 //================== PRIVATE METHODS =================
+  Future<void> _sendEvent<T>(
+      TopicHandler handler, String topic, T event) async {
+    handler(topic, event);
+  }
 
   T _findAndBuild<T>({String name = ""}) {
     return _findAndBuildImpl(T, name: name) as T;
