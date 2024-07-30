@@ -14,6 +14,7 @@ This package provides a dependency injection solution for the Dart language, as 
 - Web routes security using route guard
 - CORS configuration support
 - Scheduled tasks support
+- Eventing support
 
 ## Usage
 
@@ -369,11 +370,16 @@ class GetStatusRoute extends AbstractRoute {
         // All the route parsing is fully compatible with shelf_router since that is the actual library used
           ["/<key>"],
           Method.get,
-          // The route parameter gets passed to the handler
-          (Request req, String key) {
-            return JsonResponse.okJson({key: "requested"});
-          },
         );
+  
+  @override
+  Function buildHandler() {
+    return _respond;
+  }
+
+  Response _respond(Request req, String key) {
+    return JsonResponse.okJson({key: "requested"});
+  }
 }
 
 class PostStatusRoute extends AbstractRoute {
@@ -381,10 +387,17 @@ class PostStatusRoute extends AbstractRoute {
       : super(
           ["/<key>"],
           Method.post,
-          (Request req, String key) async {
-            return JsonResponse.ok({key: "posted"});
-          },
         );
+
+  @override
+  Function buildHandler() {
+    return _respond;
+  }
+
+  Response _respond(Request req, String key) async {
+    return JsonResponse.ok({key: "posted"});
+  }
+
 }
 
 $().webServerConfig(
@@ -443,8 +456,16 @@ $().subscribe("topic2", (topic, event) {
   print("Subscriber 2 : Got message on topic $topic with event value $event");
 });
 
+// or use the shortcut
+// $sub("topic2", (topic, event) {
+//  print("Subscriber 2 : Got message on topic $topic with event value $event");
+//});
+
+
 // Publish a message to multiple topics.
 // In this case, both subscribers will get the new message.
 $().publishEvent(["topic1", "topic2"], "newValue");
+// or use the shortcut
+// $pub(["topic1", "topic2"], "newValue");
 
 ```

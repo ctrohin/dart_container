@@ -38,3 +38,7 @@
 ## 1.0.8
 
 - Added event publish/subscribe functionality
+
+## 1.0.9
+
+- Updated dart_router_extended dependency and examples
