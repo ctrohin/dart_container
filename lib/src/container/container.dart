@@ -288,7 +288,7 @@ class Container {
   }
 
   Container webServerConfig(
-    FutureOr<Response> Function(Request) notFoundHandler,
+    NotFoundHandler notFoundHandler,
     Object address,
     int port, {
     SecurityContext? securityContext,
@@ -301,7 +301,7 @@ class Container {
     bool Function(Request)? routeGuardHandler,
   }) {
     _webServerConfig = WebServerConfig(
-      notFoundHandler,
+      notFoundHandler.notFound,
       address,
       port,
       securityContext: securityContext,

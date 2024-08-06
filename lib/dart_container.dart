@@ -16,5 +16,6 @@ export 'src/container/lookup.dart';
 export 'src/scheduler/scheduled_job.dart';
 export 'src/scheduler/scheduled_job_type.dart';
 export 'src/scheduler/scheduler.dart';
+export 'src/container/not_found_handler.dart';
 
 export 'package:dart_router_extended/dart_router_extended.dart';
