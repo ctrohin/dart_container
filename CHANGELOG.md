@@ -42,3 +42,7 @@
 ## 1.0.9
 
 - Updated dart_router_extended dependency and examples
+
+## 1.0.10
+
+- Moved to Dart 3.5.0 and above
