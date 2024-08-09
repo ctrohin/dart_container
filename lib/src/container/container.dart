@@ -21,8 +21,11 @@ class Container {
   SchedulerConfiguration? _schedulerConfig;
   final Set<String> _allowedTopics = {};
   final Map<String, List<TopicHandler>> _topicHandlers = {};
+  final Map<String, String> _rootTopics = {};
 
   static final Container _instance = Container._construct();
+  static const String topicWildCard = "*";
+  static const String topicTreeSeparator = "/";
 
   factory Container() {
     return _instance;
@@ -152,7 +155,6 @@ class Container {
 
   T get<T>({String name = ""}) {
     if (!_registered.containsKey(ContainerKey(T, name))) {
-      print(_registered);
       throw ContainerException(
           "No object of type $T and name $name found in the container");
     }
@@ -360,7 +362,6 @@ class Container {
       _schedulerConfig = SchedulerConfiguration();
       typed(Scheduler,
           builder: () => Scheduler(_schedulerConfig!), autoStart: true);
-      print("Added scheduler");
     }
     _schedulerConfig!.addJob(job, profiles);
     return this;
@@ -371,7 +372,6 @@ class Container {
       _schedulerConfig = SchedulerConfiguration();
       typed(Scheduler,
           builder: () => Scheduler(_schedulerConfig!), autoStart: true);
-      print("Added scheduler");
     }
     _schedulerConfig!.initialDelay = duration;
     return this;
@@ -382,7 +382,6 @@ class Container {
       _schedulerConfig = SchedulerConfiguration();
       typed(Scheduler,
           builder: () => Scheduler(_schedulerConfig!), autoStart: true);
-      print("Added scheduler");
     }
     _schedulerConfig!.pollingInterval = duration;
     return this;
@@ -394,6 +393,7 @@ class Container {
   }
 
   Container subscribe(String topic, TopicHandler handler) {
+    _checkWellformed(topic);
     if (_allowedTopics.isNotEmpty && !_allowedTopics.contains(topic)) {
       throw ContainerException(
           "Cannot subscribe to topic $topic. The allowed topics are $_allowedTopics");
@@ -404,16 +404,77 @@ class Container {
     return this;
   }
 
+  Container subscribeTo(String topic, AbstractTopicHandler handler) {
+    return subscribe(topic, handler.getTopicHandler());
+  }
+
   Future<void> publishEvent<T>(List<String> topics, T event) async {
-    for (String topic in topics) {
-      List<TopicHandler> handlers = _topicHandlers[topic] ?? [];
+    Set<String> uniqueTopics = _sanityCheckPublish(topics);
+    Set<TopicHandler> alreadySent = {};
+    for (String topic in uniqueTopics) {
+      Set<TopicHandler> handlers = _findHandlersForTopic(topic);
       for (TopicHandler handler in handlers) {
-        _sendEvent(handler, topic, event);
+        if (!alreadySent.contains(handler)) {
+          _sendEvent(handler, topic, event);
+        }
+        alreadySent.add(handler);
       }
     }
   }
 
 //================== PRIVATE METHODS =================
+
+  Set<String> _sanityCheckPublish(List<String> topics) {
+    Set<String> uniqueTopics = Set.from(topics);
+    for (String topic in uniqueTopics) {
+      if (topic.contains(topicWildCard)) {
+        throw ContainerException(
+            "Topic $topic contains wildcard $topicWildCard. You cannot publish to a whildcard topic");
+      }
+    }
+    return uniqueTopics;
+  }
+
+  void _checkWellformed(String topic) {
+    bool containsWildCard = topic.contains(topicWildCard);
+    int countWildcard = topicWildCard.allMatches(topic).length;
+    if (containsWildCard &&
+        countWildcard == 1 &&
+        topic.endsWith(topicTreeSeparator + topicWildCard)) {
+      return;
+    }
+    if (countWildcard > 1) {
+      throw ContainerException(
+          "Cannot use wildcard more than once in the topic body. Wildcards are only allowed at the end of the topic. Ex: mytopic/* or mytopic1/mytopic2/*");
+    }
+    if (containsWildCard) {
+      throw ContainerException(
+          "Cannot use wildcard in the topic body. Wildcards are only allowed at the end of the topic. Ex: mytopic/* or mytopic1/mytopic2/*");
+    }
+  }
+
+  Set<TopicHandler> _findHandlersForTopic(String topic) {
+    Set<TopicHandler> handlers = {};
+    for (String registeredTopic in _topicHandlers.keys) {
+      if (_matchesTopic(topic, registeredTopic)) {
+        handlers.addAll(_topicHandlers[registeredTopic]!);
+      }
+    }
+    return handlers;
+  }
+
+  bool _matchesTopic(String topic, String registeredTopic) {
+    if (registeredTopic.endsWith(topicTreeSeparator + topicWildCard)) {
+      String rootTopic = _rootTopics[registeredTopic] ??
+          registeredTopic.substring(0, registeredTopic.length - 1);
+      if (!_rootTopics.containsKey(registeredTopic)) {
+        _rootTopics[registeredTopic] = rootTopic;
+      }
+      return topic.startsWith(rootTopic);
+    }
+    return topic == registeredTopic;
+  }
+
   Future<void> _sendEvent<T>(
       TopicHandler handler, String topic, T event) async {
     handler(topic, event);
@@ -426,7 +487,6 @@ class Container {
   dynamic _findAndBuildImpl(Type t, {String name = ""}) {
     ContainerObject? existing = _registered[ContainerKey(t, name)];
     if (existing == null || !existing.profiles.contains(_profile)) {
-      print(_registered);
       throw ContainerException(
           "No object present in the container of type $t, name $name and profile $_profile");
     }

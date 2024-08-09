@@ -244,10 +244,10 @@ void main() {
       String existingStr = "";
       int existingNr = 0;
       String existingVal = "";
-      $().ifAllPresentThen([
-        Lookup.object(String),
-        Lookup.object(int),
-        Lookup.value("testVal"),
+      $allThen([
+        $find(String),
+        $find(int),
+        $findVal("testVal"),
       ], (list) {
         [existingStr, existingNr, existingVal] = list;
       });

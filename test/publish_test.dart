@@ -73,5 +73,110 @@ void main() {
       expect(val1, "test1");
       expect(val2, "test2");
     });
+
+    test("Test wellformed topic", () {
+      handler(String topic, dynamic value) {}
+      bool success = false;
+      try {
+        $().subscribe("topic", handler);
+        $().subscribe("topic/subtopic", handler);
+        $().subscribe("topic/subtopic/*", handler);
+        success = true;
+      } catch (e) {
+        success = false;
+      }
+      expect(success, true);
+    });
+
+    test("Test malformed topic", () {
+      handler(String topic, dynamic value) {}
+      bool success = true;
+      try {
+        $().subscribe("*topic", handler);
+        success = true;
+      } catch (e) {
+        success = false;
+      }
+      expect(success, false);
+
+      success = false;
+      try {
+        $().subscribe("topic*", handler);
+        success = true;
+      } catch (e) {
+        success = false;
+      }
+      expect(success, false);
+
+      success = true;
+      try {
+        $().subscribe("topic/subtopic*", handler);
+        success = true;
+      } catch (e) {
+        success = false;
+      }
+      expect(success, false);
+
+      success = true;
+      try {
+        $().subscribe("topic/subtopic/**", handler);
+        success = true;
+      } catch (e) {
+        success = false;
+      }
+      expect(success, false);
+    });
+
+    test("Test malformed topic publish with wellformed subscribe topic",
+        () async {
+      bool success = true;
+      try {
+        await $().publishEvent(["topic/*"], null);
+        success = true;
+      } catch (e) {
+        success = false;
+      }
+      expect(success, false);
+    });
+
+    test("Test malformed topic publish", () async {
+      bool success = true;
+      try {
+        await $().publishEvent(["topic*"], null);
+        success = true;
+      } catch (e) {
+        success = false;
+      }
+      expect(success, false);
+    });
+
+    test("Test publish wildcard", () async {
+      List<String> val = [];
+
+      $().subscribe("test/*", (topic, recv) {
+        val.add(recv as String);
+      });
+      $().publishEvent(["test/val1"], "test1");
+      $().publishEvent(["test/val2"], "test2");
+      sleep(Duration(seconds: 2));
+
+      expect(val, ["test1", "test2"]);
+    });
+
+    test("Test multiple topics, one handler", () async {
+      List<String> val = [];
+
+      handler(topic, recv) {
+        val.add(recv as String);
+      }
+
+      $().subscribe("test/val1", handler);
+      $().subscribe("test/val2", handler);
+
+      $().publishEvent(["test/val1", "test/val2"], "test1");
+      sleep(Duration(seconds: 2));
+
+      expect(val, ["test1"]);
+    });
   });
 }

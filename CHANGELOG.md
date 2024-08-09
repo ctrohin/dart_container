@@ -46,3 +46,8 @@
 ## 1.0.10
 
 - Moved to Dart 3.5.0 and above
+
+## 1.0.11
+
+- Added wildcard topics for subscribe/publish
+- Added AbstractTopicHandler class and subscribeTo ($subTo) to Container. This new class will produce a handler for the container to use

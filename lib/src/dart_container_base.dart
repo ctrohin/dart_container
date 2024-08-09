@@ -11,3 +11,6 @@ final $get = $().get;
 final $$get = $().getIfPresent;
 final $pub = $().publishEvent;
 final $sub = $().subscribe;
+final $subTo = $().subscribeTo;
+final $find = Lookup.object;
+final $findVal = Lookup.value;

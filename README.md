@@ -433,7 +433,7 @@ $().webServerConfig(
 ### Eventing
 With dart-container you get a simple publish/subscribe framework for passing along messages, and building reactive applications. For the time being, the support is limited to exact matching topics.
 
-
+#### Simple topics
 ```dart
 
 // First subscribe to the topic
@@ -466,5 +466,27 @@ $().subscribe("topic2", (topic, event) {
 $().publishEvent(["topic1", "topic2"], "newValue");
 // or use the shortcut
 // $pub(["topic1", "topic2"], "newValue");
+```
 
+#### Wildcards and subtopics topics
+
+```dart
+
+$().subscribe("topic/*", (topic, event) {
+  // Will receive messages from both subtopics
+});
+
+// Publish message to first subtopic
+$().publishEvent(["topic/subtopic1"], "newValue1");
+// Publish message to second subtopic
+$().publishEvent(["topic/subtopic2"], "newValue2");
+
+$().subscribe("topic/*", (topic, event) {
+  // Will receive messages from both subtopics
+});
+
+// Publish message to first subtopic
+$().publishEvent(["topic/subtopic1", "topic/subtopic1"], "newValue1");
+// IMPORTANT: When publishing a value to multiple subtopics, the subscriber is only called once
+// with the topic parameter having the value of the first matching topic from the publish list
 ```
