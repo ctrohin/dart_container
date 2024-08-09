@@ -96,11 +96,11 @@ $()
 // Retrieve object
 MyClass injectedObject = $().get();
 // Produce object using the injected factory
-SimpleObj injectedObjectIfPresent = $().get();
+SimpleObj? injectedObjectIfPresent = $().getIfPresent();
 
 // You can also use shortcut methods
 MyClass injectedObject = $get();
-SimpleObj injectedObjectIfPresent = $$get();
+SimpleObj? injectedObjectIfPresent = $$get();
 
 // Conditional callback, call some code only if an object is present in the container
 Container().ifPresentThen<MyClass>((MyClass obj) {
@@ -134,9 +134,9 @@ $().ifAllPresentThen([
 });
 // Or by calling the shortcut method
 $allThen([
-    Lookup.object(MyClass), 
-    Lookup.object(SimpleObject), 
-    Lookup.value("valueKey")
+    $look(MyClass), 
+    $look(SimpleObject), 
+    $lookVal("valueKey")
     ], (list) {
         MyClass? myClass;
         SimpleObject? simpleObject;
@@ -433,7 +433,6 @@ $().webServerConfig(
 ### Eventing
 With dart-container you get a simple publish/subscribe framework for passing along messages, and building reactive applications. For the time being, the support is limited to exact matching topics.
 
-IMPORTANT: A known limitation at this point is that if a subscriber is registered for two topics "TopicA" and "TopicB", and a publisher publishes on both topics, the subscriber will get the same message twice, one for each topic. This behavior will be changed in a future release.
 
 ```dart
 
